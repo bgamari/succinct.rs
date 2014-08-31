@@ -11,6 +11,7 @@ pub trait PopCount {
 }
 
 impl PopCount for u64 {
+    #[inline(always)]
     #[cfg(not(use_intrinsics))]
     fn pop_count(&self) -> int {
         // Broadword sideways addition
@@ -22,6 +23,7 @@ impl PopCount for u64 {
         ((x2 * l8) >> 56) as int
     }
 
+    #[inline(always)]
     #[cfg(use_intrinsics)]
     fn pop_count(&self) -> int {
         unsafe { ctpop64(*self) as int }
