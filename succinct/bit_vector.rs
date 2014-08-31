@@ -106,12 +106,37 @@ impl dict::BitSelect for BitVector {
 #[cfg(test)]
 mod test {
     use super::BitVector;
-    use super::super::dictionary::BitRank;
+    use super::super::dictionary::{BitRank, BitSelect};
 
     #[test]
-    pub fn test_rank1() {
+    pub fn test_select() {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = BitVector::from_vec(&v, 64*3);
+        let select1: Vec<(int,int)> = vec!(
+            ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
+            ((2+0*64), 1),
+            ((3+0*64), 2),
+
+            ((1+1*64), 3),
+            ((4+1*64), 4),
+
+            ((3+2*64), 5),
+            ((4+2*64), 6),
+        );
+
+        for &(select, rank) in select1.iter() {
+            let a = bv.select1(rank);
+            if (a != select) {
+                fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
+            }
+        }
+    }
+
+    #[test]
+    pub fn test_rank() {
+        let v = vec!(0b0110, 0b1001, 0b1100);
+        let bv = BitVector::from_vec(&v, 64*3);
+
         let rank0: Vec<(int, int)> = vec!(
             ((0+0*64), 0),
         );
@@ -135,18 +160,16 @@ mod test {
             ((4+2*64), 6),
         );
 
-        for &(i, ans) in rank0.iter() {
-            let a = bv.rank0(i);
-            //println!("{}: {}", a, a==ans);
-            if (a != ans) {
-                fail!("rank0({}) failed: expected {}, saw {}", i, ans, a);
+        for &(select, rank) in rank0.iter() {
+            let a = bv.rank0(select);
+            if (a != rank) {
+                fail!("rank0({}) failed: expected {}, saw {}", select, rank, a);
             }
         }
-        for &(i, ans) in rank1.iter() {
-            let a = bv.rank1(i);
-            //println!("{}: {}", a, a==ans);
-            if (a != ans) {
-                fail!("rank1({}) failed: expected {}, saw {}", i, ans, a);
+        for &(select, rank) in rank1.iter() {
+            let a = bv.rank1(select);
+            if (a != rank) {
+                fail!("rank1({}) failed: expected {}, saw {}", select, rank, a);
             }
         }
     }
