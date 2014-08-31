@@ -25,10 +25,9 @@ impl Counts {
     /// Search for the word that contains the `n`th one within this
     /// block
     fn select_word(&self, n: uint) -> uint {
-        debug_assert!(self.word_rank(0) <= n);
         for i in range(0,7) {
-            if self.word_rank(i) > n {
-                return i-1;
+            if self.word_rank(i) <= n {
+                return i;
             }
         }
         return 7;
