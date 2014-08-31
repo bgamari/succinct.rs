@@ -6,6 +6,7 @@ use super::num::integer::Integer;
 use std::num::{zero, one, Int};
 use super::dictionary::{BitRank, BitSelect};
 use std::slice::{Found, NotFound};
+use std::collections::Collection;
 
 /// Counts for a basic block
 struct Counts {
@@ -42,6 +43,12 @@ struct Rank9 {
     buffer: Vec<u64>,
     /// the basic block counts
     counts: Vec<Counts>,
+}
+
+impl Collection for Rank9 {
+    fn len(&self) -> uint {
+        self.bits as uint
+    }
 }
 
 fn div_ceil<T: Integer>(a: T, b: T) -> T {
