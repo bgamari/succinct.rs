@@ -26,7 +26,7 @@ impl Counts {
     /// block
     fn select_word(&self, n: uint) -> uint {
         for i in range(0,7) {
-            if self.word_rank(i) <= n {
+            if self.word_rank(i) > n {
                 return i;
             }
         }
@@ -56,20 +56,20 @@ impl Rank9 {
     fn from_vec(mut v: Vec<u64>, length_in_bits: int) -> Rank9 {
         let n_blocks = div_ceil(length_in_bits, 64*8);
 
+        // add padding to end as necessary
         if length_in_bits % (64*8) != 0 {
             let padding = 8*n_blocks as uint - v.len();
             v.grow(padding, &0);
         }
 
-        // Compute counts
+        // compute counts
         let mut counts: Vec<Counts> = Vec::with_capacity(n_blocks as uint);
         let mut accum = Counts { block_rank: 0, word_ranks: 0 };
         // accumulate number of ones in this block
         let mut block_accum: u64 = 0;
         // accumulate number of ones
         let mut rank_accum: u64 = 0;
-        for i in range(0, 8*n_blocks) {
-            let word = v[i as uint];
+        for (i, word) in v.iter().enumerate() {
             let ones = word.count_ones();
             rank_accum += ones;
             block_accum += ones;
@@ -95,17 +95,31 @@ impl Rank9 {
 
 impl BitRank for Rank9 {
     fn rank1(&self, n: int) -> int {
-        let (word, bit) = n.div_mod_floor(&64); // w == word
+        let (word, bit_idx) = n.div_mod_floor(&64); // w == word
         let (block, block_word) = word.div_mod_floor(&8);
         let counts = &self.counts[block as uint];
-        let t = block_word - 1;
+        let t: int = block_word - 1;
 
         // compute second-level contribution
+        // This is a bit tricky to avoid an unnecessary branch; functionally,
+        //
+        // ```
+        // let word_rank = match block_word {
+        //     0 => 0,
+        //     _ => counts.word_rank(block_word - 1),
+        // };
+        // ```
         let shift = (t + ((t >> 60) & 8)) * 9;
         let word_rank = (counts.word_ranks >> (shift as uint)) & 0x1ff;
 
+        // TODO: kill me
+        match block_word {
+            0 => {},
+            _ => assert_eq!(counts.word_rank(block_word as uint - 1), word_rank as uint),
+        };
+
         // within-word contribution
-        let masked = self.buffer[word as uint] & ((1 << (bit as uint)) - 1);
+        let masked = self.buffer[word as uint] & ((1 << (bit_idx as uint)) - 1);
 
         (counts.block_rank + word_rank + masked.count_ones()) as int
     }
@@ -118,22 +132,26 @@ impl BitSelect for Rank9 {
     fn select(&self, bit: bool, n: int) -> int {
         // uses `laura-select`
         debug_assert!(n >= 0);
-        let res = self.counts.as_slice().binary_search(|x| x.block_rank.cmp(&(n as u64)));
-        match res {
-            Found(i) => {
-                self.buffer[i*8].select(bit, 0)
+        match self.counts.as_slice().binary_search(|x| x.block_rank.cmp(&(n as u64))) {
+            Found(block) => {
+                // We found a block beginning with exactly the right rank; We're done.
+                (block as int)*64*8 + self.buffer[block*8].select(bit, 0)
             },
             NotFound(i) => {
+                // We found the block succceeding the block containing
+                // the desired rank.
                 let block = i - 1;
                 let counts = &self.counts[block];
-                        for j in range(0,7) {
-                            println!("{} = {}", j, counts.word_rank(j));
-                        }
+                assert!(n > counts.block_rank as int);
                 let word_idx = counts.select_word(n as uint - counts.block_rank as uint);
 
-                let mut word = self.buffer[word_idx];
-                let remain: int = n - counts.block_rank as int - counts.word_rank(word_idx) as int;
-                (block as int)*64*8 + (word_idx as int)*8 + word.select(bit, remain) as int
+                let mut word: u64 = self.buffer[word_idx];
+                let remain: int = if word_idx > 0 {
+                    n - counts.block_rank as int - counts.word_rank(word_idx - 1) as int
+                } else {
+                    n - counts.block_rank as int
+                };
+                (block as int)*64*8 + (word_idx as int)*64 + word.select(bit, remain) as int
             }
         }
     }
