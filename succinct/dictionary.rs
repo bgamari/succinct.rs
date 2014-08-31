@@ -48,14 +48,37 @@ pub trait BitRank {
 pub trait BitSelect {
     /// Given a sequence of bits, `select0(n)` is the 1-based position
     /// of the `n`th zero.
-    fn select0(&self, n: Count) -> Pos;
+    fn select0(&self, n: Count) -> Pos {
+        self.select(false, n)
+    }
 
     /// Given a sequence of bits, `select1(n)` is the 0-based position
     /// of the `n`th one.
-    fn select1(&self, n: Count) -> Pos;
+    fn select1(&self, n: Count) -> Pos {
+        self.select(true, n)
+    }
+
+    fn select(&self, bit: bool, n: Count) -> Pos;
 }
 
-//impl BitSelect for u64 {}
+impl BitSelect for u64 {
+    fn select(&self, bit: bool, n0: Count) -> Pos {
+        let mut idx: int = 0;
+        let mut x: u64 = *self;
+        let mut n: int = n0;
+        for i in range(0u, 64) {
+            if (x & 1) == (bit as u64) {
+                if n == 0 {
+                    return idx
+                }
+                n -= 1;
+            }
+            idx += 1;
+            x >>= 1;
+        }
+        fail!("Not enough {} bits in {} to select({})", bit, *self, n0);
+    }
+}
 
 /// Out of range bits taken to be 0
 impl BitRank for u64 {
@@ -81,9 +104,17 @@ impl BitRank for u64 {
 #[cfg(test)]
 mod test {
     use super::PopCount;
+    use super::BitSelect;
+
     #[test]
     pub fn test_pop_count() {
         assert_eq!(0x1u64.pop_count(), 1);
         assert_eq!(0xffu64.pop_count(), 8);
+    }
+
+    #[test]
+    pub fn test_u64_select() {
+        assert_eq!(0x5u64.select1(0), 0);
+        assert_eq!(0x5u64.select1(1), 2);
     }
 }

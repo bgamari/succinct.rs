@@ -49,34 +49,6 @@ impl BitVector {
             buffer: vec.clone()
         }
     }
-
-    //#[inline(always)]
-    fn select(&self, bit: bool, n: int) -> int {
-        let mut cur: u64 = 0;
-        let mut remain: int = n+1; // counting down from n+1
-        let mut idx: int = 0;
-        for i in self.buffer.iter() {
-            cur = *i;
-            let ones = i.pop_count();
-            let matches = if bit { ones } else { 64 - ones };
-            if remain - matches > 0 {
-                remain -= matches;
-                idx += 64;
-            } else {
-                break
-            }
-        }
-        loop {
-            println!("remain = {}, cur = {}, idx={}", remain, cur & 1, idx);
-            if (cur & 1) == (bit as u64) {
-                remain -= 1;
-                if remain == 0 { break; }
-            }
-            idx += 1;
-            cur = cur >> 1;
-        }
-        idx
-    }
 }
 
 impl dict::BitRank for BitVector {
@@ -121,12 +93,23 @@ impl dict::BitSelect for BitVector {
 */
 
 impl dict::BitSelect for BitVector {
-    fn select0(&self, n: int) -> int {
-        self.select(false, n)
-    }
-
-    fn select1(&self, n: int) -> int {
-        self.select(true, n)
+    //#[inline(always)]
+    fn select(&self, bit: bool, n: int) -> int {
+        let mut cur: u64 = 0;
+        let mut remain: int = n+1; // counting down from n+1
+        let mut idx: int = 0;
+        for i in self.buffer.iter() {
+            cur = *i;
+            let ones = i.pop_count();
+            let matches = if bit { ones } else { 64 - ones };
+            if remain - matches > 0 {
+                remain -= matches;
+                idx += 64;
+            } else {
+                break
+            }
+        }
+        idx + cur.select(bit, remain - 1)
     }
 }
 
