@@ -1,5 +1,4 @@
-use std::intrinsics::{ctpop64};
-
+use super::dictionary::PopCount;
 use super::dictionary as dict;
 
 /// A bit vector
@@ -58,7 +57,7 @@ impl BitVector {
         let mut idx: int = 0;
         for i in self.buffer.iter() {
             cur = *i;
-            let ones = unsafe { ctpop64(*i) as int };
+            let ones = i.pop_count();
             let matches = if bit { ones } else { 64 - ones };
             if remain - matches > 0 {
                 remain -= matches;
@@ -108,10 +107,10 @@ impl dict::BitSelect for BitVector {
                 Some(n) => *n,
                 None    => fail!();
             };
-            n -= ctpop64(cur) as int;
+            n -= cur.pop_count();
         }
 
-        let count = ctpop64(cur) as int;
+        let count = cur.pop_count();
         if count < n {
             fail!();
         } else {

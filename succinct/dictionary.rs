@@ -1,7 +1,32 @@
 /// Rank and select operations
 ///
 /// Bit indices start at 0.
+
+#[cfg(use_intrinsics)]
 use std::intrinsics::{ctpop64};
+
+/// Count the number of ones in a value
+pub trait PopCount {
+    fn pop_count(&self) -> int;
+}
+
+impl PopCount for u64 {
+    #[cfg(not(use_intrinsics))]
+    fn pop_count(&self) -> int {
+        // Broadword sideways addition
+        let x: u64 = *self;
+        let x0: u64 = x - ((x & 0xaaaa_aaaa_aaaa_aaaa) >> 1);
+        let x1: u64 = (x0 & 0x3333_3333_3333_3333) + ((x0 >> 2) & 0x3333_3333_3333_3333);
+        let x2: u64 = (x1 + (x1 >> 4)) & 0x0F0F0_F0F0_F0F0_F0F;
+        let l8: u64 = 0x0101_0101_0101_0101;
+        ((x2 * l8) >> 56) as int
+    }
+
+    #[cfg(use_intrinsics)]
+    fn pop_count(&self) -> int {
+        unsafe { ctpop64(*self) as int }
+    }
+}
 
 type Pos = int;
 type Count = int;
@@ -35,18 +60,28 @@ impl BitRank for u64 {
     fn rank1(&self, n: int) -> int {
         if n < 64 {
             let mask: u64 = (1 << (n as uint)) - 1;
-            unsafe { ctpop64(mask & *self) as int }
+            (mask & *self).pop_count()
         } else {
-            unsafe { ctpop64(*self) as int }
+            self.pop_count()
         }
     }
 
     fn rank0(&self, n: int) -> int {
         if n < 64 {
             let mask = (1 << (n as uint)) - 1;
-            unsafe { ctpop64(mask & *self) as int }
+            (mask & *self).pop_count()
         } else {
-            unsafe { n - ctpop64(*self) as int }
+            n - self.pop_count()
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::PopCount;
+    #[test]
+    pub fn test_pop_count() {
+        assert_eq!(0x1u64.pop_count(), 1);
+        assert_eq!(0xffu64.pop_count(), 8);
     }
 }
