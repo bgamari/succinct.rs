@@ -40,14 +40,11 @@ impl dict::BitRank for BitVector {
         let mut rank = 0;
         assert!(n < self.bits);
         for i in self.buffer.iter().take(n as uint / 64) {
-            unsafe { rank += ctpop64(*i); }
+            rank += i.rank1(64);
         }
-        let remains = n % 64;
-        if remains != 0 {
-            let mask = (1 << (remains as uint)) - 1;
-            unsafe { rank += ctpop64(self.buffer[n as uint / 64] & mask); }
-        }
-        rank as int
+
+        rank += self.buffer[n as uint / 64].rank1(n % 64);
+        rank
     }
 }
 
@@ -116,25 +113,26 @@ mod test {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = BitVector::from_vec(&v, 64*3);
         let rank0: Vec<(int, int)> = vec!(
-            //((0+0*64), 0),
+            ((0+0*64), 0),
         );
         let rank1: Vec<(int, int)> = vec!(
-            //((0+0*64), 0), // rank is non exclusive rank of zero is always 0
-            //((1+0*64), 0),
-            //((2+0*64), 1),
-            //((3+0*64), 2),
-            //((4+0*64), 2),
+            ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
+            ((1+0*64), 0),
+            ((2+0*64), 1),
+            ((3+0*64), 2),
+            ((4+0*64), 2),
 
-            //((0+1*64), 2), // second broadword
-            //((1+1*64), 3),
-            //((2+1*64), 3),
-            //((3+1*64), 3),
-            //((4+1*64), 4),
+            ((0+1*64), 2), // second broadword
+            ((1+1*64), 3),
+            ((2+1*64), 3),
+            ((3+1*64), 3),
+            ((4+1*64), 4),
 
-            //((0+2*64), 4),
-            ((1+2*64), 5),
-            ((2+2*64), 6),
-            ((3+2*64), 6),
+            ((0+2*64), 4),
+            ((1+2*64), 4),
+            ((2+2*64), 4),
+            ((3+2*64), 5),
+            ((4+2*64), 6),
         );
 
         for &(i, ans) in rank0.iter() {
