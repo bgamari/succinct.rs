@@ -94,7 +94,7 @@ impl BitRank for u64 {
     fn rank0(&self, n: int) -> int {
         if n < 64 {
             let mask = (1 << (n as uint)) - 1;
-            (mask & *self).pop_count()
+            n - (mask & *self).pop_count()
         } else {
             n - self.pop_count()
         }
