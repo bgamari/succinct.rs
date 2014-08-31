@@ -1,8 +1,13 @@
+/// rank9 bitvector
+///
+/// See Vigna 2014.
+
 use super::num::integer::Integer;
 use std::num::{zero, one, Int};
 use super::dictionary::{BitRank, BitSelect};
 use std::slice::{Found, NotFound};
 
+/// Counts for a basic block
 struct Counts {
     /// first level count (rank up to p)
     block_rank: u64,
@@ -17,9 +22,9 @@ impl Counts {
         ((self.word_ranks >> (9*i)) & 0x1ff) as uint
     }
 
-    /// Search for the word that contains the `n`th one within the
+    /// Search for the word that contains the `n`th one within this
     /// block
-    fn search_word(&self, n: uint) -> uint {
+    fn select_word(&self, n: uint) -> uint {
         debug_assert!(self.word_rank(0) <= n);
         for i in range(0,7) {
             if self.word_rank(i) > n {
@@ -125,7 +130,7 @@ impl BitSelect for Rank9 {
                         for j in range(0,7) {
                             println!("{} = {}", j, counts.word_rank(j));
                         }
-                let word_idx = counts.search_word(n as uint - counts.block_rank as uint);
+                let word_idx = counts.select_word(n as uint - counts.block_rank as uint);
 
                 let mut word = self.buffer[word_idx];
                 let remain: int = n - counts.block_rank as int - counts.word_rank(word_idx) as int;
