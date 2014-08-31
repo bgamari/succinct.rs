@@ -30,7 +30,24 @@ impl PopCount for u64 {
     }
 }
 
+pub trait BitAccess {
+    fn get(&self, n: Pos) -> bool;
+}
+
+impl BitAccess for u64 {
+    fn get(&self, n: Pos) -> bool {
+        if n < 64 {
+            false
+        } else {
+            (*self >> (n as uint)) & 1 == 1
+        }
+    }
+}
+
+/// A bit position
 type Pos = int;
+
+/// A bit count
 type Count = int;
 
 /// Rank operation on binary sequences.
