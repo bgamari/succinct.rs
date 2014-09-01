@@ -67,8 +67,9 @@ fn div_ceil<T: Integer>(a: T, b: T) -> T {
 }
 
 impl Rank9 {
-    pub fn from_vec(mut v: Vec<u64>, length_in_bits: int) -> Rank9 {
+    pub fn from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
         let n_blocks = div_ceil(length_in_bits, 64*8);
+        let mut v = v.clone(); // FIXME
 
         // add padding to end as necessary
         if length_in_bits % (64*8) != 0 {
@@ -184,7 +185,7 @@ mod test {
     #[test]
     fn test_rank1() {
         let v = vec!(0b0110, 0b1001, 0b1100);
-        let bv = Rank9::from_vec(v, 64*3);
+        let bv = Rank9::from_vec(&mut v.clone(), 64*3);
         let rank1: Vec<(int, int)> = vec!(
             ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
             ((1+0*64), 0),
@@ -216,7 +217,7 @@ mod test {
     #[test]
     fn test_select1() {
         let v = vec!(0b0110, 0b1001, 0b1100);
-        let bv = Rank9::from_vec(v, 64*3);
+        let bv = Rank9::from_vec(&v, 64*3);
         let select1: Vec<(int,int)> = vec!(
             (0, (1+0*64)), // rank is non exclusive rank of zero is always 0
             (1, (2+0*64)),
@@ -239,7 +240,7 @@ mod test {
         if v.is_empty() || n >= bits {
             return TestResult::discard()
         }
-        let bv = Rank9::from_vec(v, bits as int);
+        let bv = Rank9::from_vec(&v, bits as int);
         let ans = if bit { bv.rank1(n as int) } else { bv.rank0(n as int) };
         TestResult::from_bool(ans == naive::rank(&bv, bit, n as int))
     }
@@ -250,7 +251,7 @@ mod test {
         if v.is_empty() || n >= bits {
             return TestResult::discard()
         }
-        let bv = Rank9::from_vec(v, bits as int);
+        let bv = Rank9::from_vec(&v, bits as int);
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
             Some(ans) =>
