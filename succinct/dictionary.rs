@@ -6,6 +6,7 @@
 use std::intrinsics::{ctpop64};
 
 /// Count the number of ones in a value
+#[deprecated]
 pub trait PopCount {
     fn pop_count(&self) -> int;
 }
@@ -102,18 +103,18 @@ impl BitRank for u64 {
     fn rank1(&self, n: int) -> int {
         if n < 64 {
             let mask: u64 = (1 << (n as uint)) - 1;
-            (mask & *self).pop_count()
+            (mask & *self).count_ones() as int
         } else {
-            self.pop_count()
+            self.count_ones() as int
         }
     }
 
     fn rank0(&self, n: int) -> int {
         if n < 64 {
             let mask = (1 << (n as uint)) - 1;
-            n - (mask & *self).pop_count()
+            (mask | *self).count_zeros() as int
         } else {
-            n - self.pop_count()
+            self.count_zeros() as int
         }
     }
 }

@@ -1,4 +1,4 @@
-use super::dictionary::{BitAccess, PopCount};
+use super::dictionary::{BitAccess};
 use super::dictionary as dict;
 
 /// A bit vector
@@ -89,8 +89,7 @@ impl dict::BitSelect for BitVector {
         let mut idx: int = 0;
         for i in self.buffer.iter() {
             cur = *i;
-            let ones = i.pop_count();
-            let matches = if bit { ones } else { 64 - ones };
+            let matches = if bit { i.count_ones() } else { i.count_zeros() } as int;
             if remain - matches > 0 {
                 remain -= matches;
                 idx += 64;
