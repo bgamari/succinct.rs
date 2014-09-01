@@ -124,12 +124,118 @@ impl BitRank for u64 {
 }
 
 #[cfg(test)]
-mod test {
-    use super::BitSelect;
+pub mod test {
+    use super::{BitRank, BitSelect};
 
     #[test]
     pub fn test_u64_select() {
         assert_eq!(0x5u64.select1(0), 0);
         assert_eq!(0x5u64.select1(1), 2);
+    }
+
+    pub fn test_select0<T: BitSelect>(from_vec: |&Vec<u64>, int| -> T) {
+        let v = vec!(0b0110, 0b1001, 0b1100);
+        let bv = from_vec(&v, 64*3);
+        let select0: Vec<(int, int)> = vec!(
+            (0,   0+0*64),
+            (1,   3+0*64),
+            (2,   4+0*64),
+
+            (62,  1+1*64),
+            (63,  2+1*64),
+            (64,  4+1*64),
+            (65,  5+1*64),
+
+            (124, 0+2*64),
+            (125, 1+2*64),
+            (126, 4+2*64),
+            (127, 5+2*64),
+        );
+        for &(rank, select) in select0.iter() {
+            let a = bv.select0(rank);
+            if a != select {
+                fail!("select0({}) failed: expected {}, saw {}", rank, select, a);
+            }
+        }
+    }
+
+    pub fn test_select1<T: BitSelect>(from_vec: |&Vec<u64>, int| -> T) {
+        let v = vec!(0b0110, 0b1001, 0b1100);
+        let bv = from_vec(&v, 64*3);
+        let select1: Vec<(int,int)> = vec!(
+            (0, (1+0*64)), // rank is non exclusive rank of zero is always 0
+            (1, (2+0*64)),
+            (2, (0+1*64)),
+            (3, (3+1*64)),
+            (4, (2+2*64)),
+            (5, (3+2*64)),
+        );
+        for &(rank, select) in select1.iter() {
+            let a = bv.select1(rank);
+            if a != select {
+                fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
+            }
+        }
+    }
+
+    pub fn test_rank0<T: BitRank>(from_vec: |&Vec<u64>, int| -> T) {
+        let v = vec!(0b0110, 0b1001, 0b1100);
+        let bv = from_vec(&v, 64*3);
+        let rank0: Vec<(int, int)> = vec!(
+            ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
+            ((1+0*64), 1),
+            ((2+0*64), 1),
+            ((3+0*64), 1),
+            ((4+0*64), 2),
+
+            ((0+1*64), 62), // second broadword
+            ((1+1*64), 62),
+            ((2+1*64), 63),
+            ((3+1*64), 64),
+            ((4+1*64), 64),
+
+            ((0+2*64), 124),
+            ((1+2*64), 125),
+            ((2+2*64), 126),
+            ((3+2*64), 126),
+            ((4+2*64), 126),
+        );
+        for &(select, rank) in rank0.iter() {
+            let a = bv.rank0(select);
+            if a != rank {
+                fail!("rank0({}) failed: expected {}, saw {}", select, rank, a);
+            }
+        }
+    }
+
+    pub fn test_rank1<T: BitRank>(from_vec: |&Vec<u64>, int| -> T) {
+        let v = vec!(0b0110, 0b1001, 0b1100);
+        let bv = from_vec(&v.clone(), 64*3);
+        let rank1: Vec<(int, int)> = vec!(
+            ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
+            ((1+0*64), 0),
+            ((2+0*64), 1),
+            ((3+0*64), 2),
+            ((4+0*64), 2),
+
+            ((0+1*64), 2), // second broadword
+            ((1+1*64), 3),
+            ((2+1*64), 3),
+            ((3+1*64), 3),
+            ((4+1*64), 4),
+
+            ((0+2*64), 4),
+            ((1+2*64), 4),
+            ((2+2*64), 4),
+            ((3+2*64), 5),
+            ((4+2*64), 6),
+        );
+
+        for &(select, rank) in rank1.iter() {
+            let a = bv.rank1(select);
+            if a != rank {
+                fail!("rank1({}) failed: expected {}, saw {}", select, rank, a);
+            }
+        }
     }
 }

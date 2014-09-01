@@ -183,55 +183,23 @@ mod test {
     use super::super::naive;
 
     #[test]
+    fn test_rank0() {
+        super::super::dictionary::test::test_rank0(Rank9::from_vec);
+    }
+
+    #[test]
     fn test_rank1() {
-        let v = vec!(0b0110, 0b1001, 0b1100);
-        let bv = Rank9::from_vec(&mut v.clone(), 64*3);
-        let rank1: Vec<(int, int)> = vec!(
-            ((0+0*64), 0), // rank is non exclusive rank of zero is always 0
-            ((1+0*64), 0),
-            ((2+0*64), 1),
-            ((3+0*64), 2),
-            ((4+0*64), 2),
+        super::super::dictionary::test::test_rank1(Rank9::from_vec);
+    }
 
-            ((0+1*64), 2), // second broadword
-            ((1+1*64), 3),
-            ((2+1*64), 3),
-            ((3+1*64), 3),
-            ((4+1*64), 4),
-
-            ((0+2*64), 4),
-            ((1+2*64), 4),
-            ((2+2*64), 4),
-            ((3+2*64), 5),
-            ((4+2*64), 6),
-        );
-
-        for &(select, rank) in rank1.iter() {
-            let a = bv.rank1(select);
-            if a != rank {
-                fail!("rank1({}) failed: expected {}, saw {}", select, rank, a);
-            }
-        }
+    #[test]
+    fn test_select0() {
+        super::super::dictionary::test::test_select0(Rank9::from_vec);
     }
 
     #[test]
     fn test_select1() {
-        let v = vec!(0b0110, 0b1001, 0b1100);
-        let bv = Rank9::from_vec(&v, 64*3);
-        let select1: Vec<(int,int)> = vec!(
-            (0, (1+0*64)), // rank is non exclusive rank of zero is always 0
-            (1, (2+0*64)),
-            (2, (0+1*64)),
-            (3, (3+1*64)),
-            (4, (2+2*64)),
-            (5, (3+2*64)),
-        );
-        for &(rank, select) in select1.iter() {
-            let a = bv.select1(rank);
-            if a != select {
-                fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
-            }
-        }
+        super::super::dictionary::test::test_select1(Rank9::from_vec);
     }
 
     #[quickcheck]
