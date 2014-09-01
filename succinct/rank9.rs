@@ -36,7 +36,7 @@ impl Counts {
 }
 
 /// Bitvector supporting efficient rank and select
-struct Rank9 {
+pub struct Rank9 {
     /// length of bitvector in bits
     bits: int,
     /// the bitvector data
@@ -67,7 +67,7 @@ fn div_ceil<T: Integer>(a: T, b: T) -> T {
 }
 
 impl Rank9 {
-    fn from_vec(mut v: Vec<u64>, length_in_bits: int) -> Rank9 {
+    pub fn from_vec(mut v: Vec<u64>, length_in_bits: int) -> Rank9 {
         let n_blocks = div_ceil(length_in_bits, 64*8);
 
         // add padding to end as necessary
