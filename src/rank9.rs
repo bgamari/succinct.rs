@@ -109,6 +109,7 @@ impl Rank9 {
 
 impl BitRank for Rank9 {
     fn rank1(&self, n: int) -> int {
+        assert!(n < self.bits);
         let (word, bit_idx) = n.div_mod_floor(&64); // w == word
         let (block, block_word) = word.div_mod_floor(&8);
         let counts = &self.counts[block as uint];
