@@ -54,12 +54,13 @@ impl dict::BitRank for BitVector {
 
     fn rank1(&self, n: int) -> int {
         let mut rank = 0;
-        assert!(n < self.bits);
         for i in self.buffer.iter().take(n as uint / 64) {
             rank += i.rank1(64);
         }
 
-        rank += self.buffer[n as uint / 64].rank1(n % 64);
+        if n < self.len() as int {
+            rank += self.buffer[n as uint / 64].rank1(n % 64);
+        }
         rank
     }
 }
