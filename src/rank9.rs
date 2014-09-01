@@ -137,8 +137,9 @@ impl BitRank for Rank9 {
 
         (counts.block_rank + word_rank + masked.count_ones()) as int
     }
+
     fn rank0(&self, n: int) -> int {
-        0
+        n - self.rank1(n)
     }
 }
 
