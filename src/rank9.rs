@@ -4,7 +4,7 @@
 
 use super::num::integer::Integer;
 use std::num::{zero, one, Int};
-use super::dictionary::{BitRank, BitSelect, BitAccess};
+use super::dictionary::{BitRank, Select, BitAccess};
 use std::slice::{Found, NotFound};
 use std::collections::Collection;
 
@@ -145,14 +145,15 @@ impl BitRank for Rank9 {
     }
 }
 
-impl BitSelect for Rank9 {
-    fn select(&self, bit: bool, n: int) -> int {
+impl Select<bool> for Rank9 {
+    fn select(&self, bit: &bool, n: int) -> int {
+        let bit = *bit;
         // uses `laura-select`
         debug_assert!(n >= 0);
         match self.counts.as_slice().binary_search(|x| x.block_rank.cmp(&(n as u64))) {
             Found(block) => {
                 // We found a block beginning with exactly the right rank; We're done.
-                (block as int)*64*8 + self.buffer[block*8].select(bit, 0)
+                (block as int)*64*8 + self.buffer[block*8].select(&bit, 0)
             },
             NotFound(i) => {
                 // We found the block succceeding the block containing
@@ -168,7 +169,7 @@ impl BitSelect for Rank9 {
                 } else {
                     n - counts.block_rank as int
                 };
-                (block as int)*64*8 + (word_idx as int)*64 + word.select(bit, remain) as int
+                (block as int)*64*8 + (word_idx as int)*64 + word.select(&bit, remain) as int
             }
         }
     }
@@ -179,7 +180,7 @@ mod test {
     use quickcheck::TestResult;
 
     use super::Rank9;
-    use super::super::dictionary::{BitRank, BitSelect};
+    use super::super::dictionary::{BitRank, Select};
     use super::super::naive;
 
     #[test]
@@ -223,7 +224,7 @@ mod test {
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
             Some(ans) =>
-                TestResult::from_bool(ans == bv.select(bit, n as int))
+                TestResult::from_bool(ans == bv.select(&bit, n as int))
         }
     }
 }

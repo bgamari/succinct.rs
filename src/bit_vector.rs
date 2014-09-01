@@ -66,9 +66,10 @@ impl dict::BitRank for BitVector {
     }
 }
 
-impl dict::BitSelect for BitVector {
-    //#[inline(always)]
-    fn select(&self, bit: bool, n: int) -> int {
+impl dict::Select<bool> for BitVector {
+    #[inline(always)]
+    fn select(&self, bit: &bool, n: int) -> int {
+        let bit: bool = *bit;
         debug_assert!(n >= 0);
         let mut cur: u64 = 0;
         let mut remain: int = n+1; // counting down from n+1
@@ -83,7 +84,7 @@ impl dict::BitSelect for BitVector {
                 break
             }
         }
-        idx + cur.select(bit, remain - 1)
+        idx + cur.select(&bit, remain - 1)
     }
 }
 
@@ -92,7 +93,7 @@ mod test {
     use quickcheck::TestResult;
 
     use super::BitVector;
-    use super::super::dictionary::{BitRank, BitSelect, BitAccess};
+    use super::super::dictionary::{BitRank, Select, BitAccess};
     use super::super::naive;
 
     #[test]
@@ -147,7 +148,7 @@ mod test {
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
             Some(ans) =>
-                TestResult::from_bool(ans == bv.select(bit, n as int))
+                TestResult::from_bool(ans == bv.select(&bit, n as int))
         }
     }
 }

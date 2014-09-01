@@ -23,6 +23,28 @@ pub type Pos = int;
 /// A bit count
 pub type Count = int;
 
+/// Rank operation
+pub trait Rank<T> {
+    fn rank(&self, el: &T, n: Pos) -> Count;
+}
+
+impl<T: BitRank> Rank<bool> for T {
+    fn rank(&self, el: &bool, n: Pos) -> Count {
+        if *el {
+            self.rank1(n)
+        } else {
+            self.rank0(n)
+        }
+    }
+}
+
+/// Select operation
+pub trait Select<T> {
+    /// Given a sequence, `select(n)` is the 0-based position
+    /// of the `n`th zero.
+    fn select(&self, el: &T, n: Count) -> Pos;
+}
+
 /// Rank operation on binary sequences.
 pub trait BitRank {
     /// Given a sequence of bits, `rank0(n)` is the number of zeros
@@ -34,25 +56,9 @@ pub trait BitRank {
     fn rank1(&self, n: Pos) -> Count;
 }
 
-/// Select operation on binary sequences
-pub trait BitSelect {
-    /// Given a sequence of bits, `select0(n)` is the 1-based position
-    /// of the `n`th zero.
-    fn select0(&self, n: Count) -> Pos {
-        self.select(false, n)
-    }
-
-    /// Given a sequence of bits, `select1(n)` is the 0-based position
-    /// of the `n`th one.
-    fn select1(&self, n: Count) -> Pos {
-        self.select(true, n)
-    }
-
-    fn select(&self, bit: bool, n: Count) -> Pos;
-}
-
-impl BitSelect for u64 {
-    fn select(&self, bit: bool, n0: Count) -> Pos {
+impl Select<bool> for u64 {
+    fn select(&self, bit: &bool, n0: Count) -> Pos {
+        let bit: bool = *bit;
         let mut idx: int = 0;
         let mut x: u64 = *self;
         let mut n: int = n0;
@@ -125,15 +131,15 @@ impl BitRank for u64 {
 
 #[cfg(test)]
 pub mod test {
-    use super::{BitRank, BitSelect};
+    use super::{BitRank, Select};
 
     #[test]
     pub fn test_u64_select() {
-        assert_eq!(0x5u64.select1(0), 0);
-        assert_eq!(0x5u64.select1(1), 2);
+        assert_eq!(0x5u64.select(&true, 0), 0);
+        assert_eq!(0x5u64.select(&true, 1), 2);
     }
 
-    pub fn test_select0<T: BitSelect>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_select0<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let select0: Vec<(int, int)> = vec!(
@@ -152,14 +158,14 @@ pub mod test {
             (127, 5+2*64),
         );
         for &(rank, select) in select0.iter() {
-            let a = bv.select0(rank);
+            let a = bv.select(&false, rank);
             if a != select {
                 fail!("select0({}) failed: expected {}, saw {}", rank, select, a);
             }
         }
     }
 
-    pub fn test_select1<T: BitSelect>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_select1<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let select1: Vec<(int,int)> = vec!(
@@ -171,7 +177,7 @@ pub mod test {
             (5, (3+2*64)),
         );
         for &(rank, select) in select1.iter() {
-            let a = bv.select1(rank);
+            let a = bv.select(&true, rank);
             if a != select {
                 fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
             }
