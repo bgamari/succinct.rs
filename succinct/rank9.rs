@@ -173,9 +173,11 @@ impl BitSelect for Rank9 {
 
 #[cfg(test)]
 mod test {
-    use super::Rank9;
-    use super::super::dictionary::{BitRank, BitSelect, BitAccess};
     use quickcheck::TestResult;
+
+    use super::Rank9;
+    use super::super::dictionary::{BitRank, BitSelect};
+    use super::super::naive;
 
     #[test]
     fn test_rank1() {
@@ -229,16 +231,6 @@ mod test {
         }
     }
 
-    fn naive_rank<T: BitAccess>(v: &T, bit: bool, n: int) -> int {
-        let mut accum = 0;
-        for i in range(0, n) {
-            if v.get(i) == bit {
-                accum += 1;
-            }
-        }
-        accum
-    }
-
     #[quickcheck]
     fn rank1_is_correct(v: Vec<u64>, n: int) -> TestResult {
         if v.is_empty() {
@@ -246,6 +238,6 @@ mod test {
         }
         let n = v.len() as int * 64;
         let bv = Rank9::from_vec(v, n);
-        TestResult::from_bool(bv.rank1(n) == naive_rank(&bv, true, n))
+        TestResult::from_bool(bv.rank1(n) == naive::rank(&bv, true, n))
     }
 }

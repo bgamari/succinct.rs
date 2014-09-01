@@ -103,8 +103,11 @@ impl dict::BitSelect for BitVector {
 
 #[cfg(test)]
 mod test {
+    use quickcheck::TestResult;
+
     use super::BitVector;
     use super::super::dictionary::{BitRank, BitSelect, BitAccess};
+    use super::super::naive;
 
     #[test]
     pub fn test_select0() {
@@ -225,5 +228,15 @@ mod test {
                 fail!("rank1({}) failed: expected {}, saw {}", select, rank, a);
             }
         }
+    }
+
+    #[quickcheck]
+    fn rank1_is_correct(v: Vec<u64>, n: int) -> TestResult {
+        if v.is_empty() {
+            return TestResult::discard()
+        }
+        let n = v.len() as int * 64;
+        let bv = BitVector::from_vec(&v, n);
+        TestResult::from_bool(bv.rank1(n) == naive::rank(&bv, true, n))
     }
 }
