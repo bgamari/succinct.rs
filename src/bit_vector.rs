@@ -215,12 +215,13 @@ mod test {
     }
 
     #[quickcheck]
-    fn rank1_is_correct(v: Vec<u64>, n: uint) -> TestResult {
+    fn rank_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
         let bits = v.len() * 64;
         if v.is_empty() {
             return TestResult::discard()
         }
         let bv = BitVector::from_vec(&v, bits as int);
-        TestResult::from_bool(bv.rank1(n as int) == naive::rank(&bv, true, n as int))
+        let ans = if bit { bv.rank1(n as int) } else { bv.rank0(n as int) };
+        TestResult::from_bool(ans == naive::rank(&bv, bit, n as int))
     }
 }
