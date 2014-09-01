@@ -27,10 +27,10 @@ impl BitAccess for u64 {
 }
 
 /// A bit position
-type Pos = int;
+pub type Pos = int;
 
 /// A bit count
-type Count = int;
+pub type Count = int;
 
 /// Rank operation on binary sequences.
 pub trait BitRank {
