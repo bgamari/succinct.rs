@@ -53,6 +53,7 @@ impl dict::BitRank for BitVector {
     }
 
     fn rank1(&self, n: int) -> int {
+        assert!(n < self.bits);
         let mut rank = 0;
         for i in self.buffer.iter().take(n as uint / 64) {
             rank += i.rank1(64);
@@ -68,6 +69,7 @@ impl dict::BitRank for BitVector {
 impl dict::BitSelect for BitVector {
     //#[inline(always)]
     fn select(&self, bit: bool, n: int) -> int {
+        debug_assert!(n >= 0);
         let mut cur: u64 = 0;
         let mut remain: int = n+1; // counting down from n+1
         let mut idx: int = 0;
@@ -217,7 +219,7 @@ mod test {
     #[quickcheck]
     fn rank_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
         let bits = v.len() * 64;
-        if v.is_empty() {
+        if v.is_empty() || n >= bits {
             return TestResult::discard()
         }
         let bv = BitVector::from_vec(&v, bits as int);
