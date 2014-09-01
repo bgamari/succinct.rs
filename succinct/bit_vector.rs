@@ -57,30 +57,6 @@ impl dict::BitRank for BitVector {
     }
 }
 
-/*
-impl dict::BitSelect for BitVector {
-    fn select1(&self, n: int) -> int {
-        let mut n: int = n;
-        let mut it = self.buffer.iter();
-        let mut cur: u64 = 0;
-        while n > 0 {
-            cur = match it.next() {
-                Some(n) => *n,
-                None    => fail!();
-            };
-            n -= cur.pop_count();
-        }
-
-        let count = cur.pop_count();
-        if count < n {
-            fail!();
-        } else {
-            // TODO
-        }
-    }
-}
-*/
-
 impl dict::BitSelect for BitVector {
     //#[inline(always)]
     fn select(&self, bit: bool, n: int) -> int {
