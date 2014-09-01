@@ -1,4 +1,4 @@
-use super::dictionary::PopCount;
+use super::dictionary::{BitAccess, PopCount};
 use super::dictionary as dict;
 
 /// A bit vector
@@ -13,24 +13,6 @@ pub struct BitVector {
 }
 
 impl BitVector {
-    /// Fetch the `n`th bit
-    pub fn get(&self, n: int) -> bool {
-        (self.buffer[n as uint / 64] >> (n as uint % 64)) & 1 == 1
-    }
-
-    /*
-    /// Set the `n`th bit
-    pub fn set(&mut self, n: int, v: bool) {
-        let mask = 1 << (n as uint % 64);
-        let b = &mut self.buffer[n as uint / 64];
-        if v {
-             *b |= mask;
-        } else {
-             *b &= !mask;
-        }
-    }
-    */
-
     pub fn zero(length_in_bits: int) -> BitVector {
         let len = if length_in_bits % 64 == 0 {
             length_in_bits / 64
@@ -48,6 +30,13 @@ impl BitVector {
             bits: length_in_bits,
             buffer: vec.clone()
         }
+    }
+}
+
+impl BitAccess for BitVector {
+    fn get(&self, n: int) -> bool {
+        let word = self.buffer[n as uint / 64];
+        (word >> (n as uint % 64)) & 1 == 1
     }
 }
 
@@ -116,7 +105,7 @@ impl dict::BitSelect for BitVector {
 #[cfg(test)]
 mod test {
     use super::BitVector;
-    use super::super::dictionary::{BitRank, BitSelect};
+    use super::super::dictionary::{BitRank, BitSelect, BitAccess};
 
     #[test]
     pub fn test_select0() {
