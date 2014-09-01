@@ -223,7 +223,7 @@ impl Select<bool> for Rank9 {
         let counts = &self.counts[block_idx];
         let mut remaining = n - counts.block_rank(bit, block_idx) as int;
         let word_idx = counts.select_word(bit, remaining as uint);
-        let word: u64 = self.buffer[word_idx];
+        let word: u64 = self.buffer[word_idx + 8*block_idx];
         remaining -= counts.word_rank(bit, word_idx) as int;
         (block_idx as int)*64*8 + (word_idx as int) * 64 + word.select(&bit, remaining)
     }
