@@ -2,12 +2,12 @@
 ///
 /// Bit indices start at 0.
 
-pub trait BitAccess {
+pub trait Access<T> {
     /// Retrieve the `n`th bit
-    fn get(&self, n: Pos) -> bool;
+    fn get(&self, n: Pos) -> T;
 }
 
-impl BitAccess for u64 {
+impl Access<bool> for u64 {
     fn get(&self, n: Pos) -> bool {
         if n < 64 {
             false

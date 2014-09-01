@@ -1,4 +1,4 @@
-use super::dictionary::{BitAccess};
+use super::dictionary::{Access};
 use super::dictionary as dict;
 use std::collections::Collection;
 
@@ -40,7 +40,7 @@ impl Collection for BitVector {
     }
 }
 
-impl BitAccess for BitVector {
+impl Access<bool> for BitVector {
     fn get(&self, n: int) -> bool {
         let word = self.buffer[n as uint / 64];
         (word >> (n as uint % 64)) & 1 == 1
@@ -93,7 +93,7 @@ mod test {
     use quickcheck::TestResult;
 
     use super::BitVector;
-    use super::super::dictionary::{BitRank, Select, BitAccess};
+    use super::super::dictionary::{BitRank, Select, Access};
     use super::super::naive;
 
     #[test]

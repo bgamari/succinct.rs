@@ -4,7 +4,7 @@
 
 use super::num::integer::Integer;
 use std::num::{zero, one, Int};
-use super::dictionary::{BitRank, Select, BitAccess};
+use super::dictionary::{BitRank, Select, Access};
 use std::slice::{Found, NotFound};
 use std::collections::Collection;
 
@@ -45,7 +45,7 @@ pub struct Rank9 {
     counts: Vec<Counts>,
 }
 
-impl BitAccess for Rank9 {
+impl Access<bool> for Rank9 {
     fn get(&self, n: int) -> bool {
         let word = self.buffer[n as uint / 64];
         (word >> (n as uint % 64)) & 1 == 1
