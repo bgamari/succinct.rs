@@ -45,7 +45,7 @@ impl Counts {
     /// Search for the word that contains the `n`th matching bit
     /// within this block
     fn select_word(&self, bit: bool, n: uint) -> uint {
-        for i in range(0,6) {
+        for i in range(0,7) {
             if n < self.word_rank(bit, i + 1) {
                 return i;
             }
