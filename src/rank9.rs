@@ -161,7 +161,7 @@ impl BitSelect for Rank9 {
                 assert!(n > counts.block_rank as int);
                 let word_idx = counts.select_word(n as uint - counts.block_rank as uint);
 
-                let mut word: u64 = self.buffer[word_idx];
+                let word: u64 = self.buffer[word_idx];
                 let remain: int = if word_idx > 0 {
                     n - counts.block_rank as int - counts.word_rank(word_idx - 1) as int
                 } else {
