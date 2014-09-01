@@ -3,9 +3,8 @@
 /// See Vigna 2014.
 
 use super::num::integer::Integer;
-use std::num::{zero, one, Int};
+use std::num::{zero, One, one, Int};
 use super::dictionary::{BitRank, Select, Access};
-use std::slice::{Found, NotFound};
 use std::collections::Collection;
 
 /// Counts for a basic block
@@ -17,17 +16,26 @@ struct Counts {
 }
 
 impl Counts {
-    /// The rank within the block up to the `i`th broadword
-    fn word_rank(&self, i: uint) -> uint {
+    /// The rank within the block up to (and inclusive of) the `i`th broadword
+    fn word_rank(&self, bit:bool, i: uint) -> uint {
         debug_assert!(i < 8);
-        ((self.word_ranks >> (9*i)) & 0x1ff) as uint
+        let ones = ((self.word_ranks >> (9*i)) & 0x1ff) as uint;
+        if bit {
+            ones
+        } else {
+            (i+1)*64 - ones
+        }
+    }
+
+    fn block_rank0(&self, block_idx: uint) -> u64 {
+        64*8*(block_idx as u64) - self.block_rank
     }
 
     /// Search for the word that contains the `n`th one within this
     /// block
-    fn select_word(&self, n: uint) -> uint {
+    fn select_word(&self, n: uint, bit:bool) -> uint {
         for i in range(0,7) {
-            if self.word_rank(i) > n {
+            if self.word_rank(bit, i) > n {
                 return i;
             }
         }
@@ -131,7 +139,7 @@ impl BitRank for Rank9 {
         // TODO: kill me
         match block_word {
             0 => {},
-            _ => assert_eq!(counts.word_rank(block_word as uint - 1), word_rank as uint),
+            _ => assert_eq!(counts.word_rank(true, block_word as uint - 1), word_rank as uint),
         };
 
         // within-word contribution
@@ -145,14 +153,46 @@ impl BitRank for Rank9 {
     }
 }
 
+enum BinarySearchResult<T> {
+    Found(T),
+    NotFound(T),
+}
+
+fn binary_search_with_idx<T: Num + Shr<uint,T> + Ord + One + Clone>(cmp: |&T| -> Ordering, lower: T, upper: T) -> BinarySearchResult<T> {
+    let mut base : T = lower.clone();
+    let mut lim : T = upper.clone();
+
+    while lim > lower {
+        let ix = base + (lim >> 1u);
+        match cmp(&ix) {
+            Equal => return Found(ix),
+            Less => {
+                base = ix + one();
+                lim = lim - one();
+            }
+            Greater => ()
+        }
+        lim = lim >> 1u;
+    }
+    return NotFound(base);
+}
+
 impl Select<bool> for Rank9 {
     fn select(&self, bit: &bool, n: int) -> int {
+        println!("select{}({})", bit, n)
         let bit = *bit;
         // uses `laura-select`
         debug_assert!(n >= 0);
-        match self.counts.as_slice().binary_search(|x| x.block_rank.cmp(&(n as u64))) {
+        let block_search = if bit {
+                binary_search_with_idx(|idx| self.counts[*idx].block_rank.cmp(&(n as u64)), 0, self.counts.len())
+                //self.counts.as_slice().binary_search(|x| x.block_rank.cmp(&(n as u64)))
+            } else {
+                binary_search_with_idx(|idx| self.counts[*idx].block_rank0(*idx).cmp(&(n as u64)), 0, self.counts.len())
+            };
+        match block_search {
             Found(block) => {
                 // We found a block beginning with exactly the right rank; We're done.
+                println!("found block {}", block);
                 (block as int)*64*8 + self.buffer[block*8].select(&bit, 0)
             },
             NotFound(i) => {
@@ -161,14 +201,15 @@ impl Select<bool> for Rank9 {
                 let block = i - 1;
                 let counts = &self.counts[block];
                 assert!(n > counts.block_rank as int);
-                let word_idx = counts.select_word(n as uint - counts.block_rank as uint);
+                let word_idx = counts.select_word(n as uint - counts.block_rank as uint, bit);
 
                 let word: u64 = self.buffer[word_idx];
                 let remain: int = if word_idx > 0 {
-                    n - counts.block_rank as int - counts.word_rank(word_idx - 1) as int
+                    n - counts.block_rank as int - counts.word_rank(bit, word_idx - 1) as int
                 } else {
                     n - counts.block_rank as int
                 };
+                println!("NotFound({}) remain={} block:{}/{} word:{}/{} bit:{}  bitvector:{:t}", i, remain, block, (block as int)*64*8, word_idx, (word_idx as int)*64, word.select(&bit, remain) as int, word);
                 (block as int)*64*8 + (word_idx as int)*64 + word.select(&bit, remain) as int
             }
         }

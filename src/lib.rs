@@ -3,6 +3,7 @@
 
 #![feature(phase)]
 
+extern crate core;
 extern crate num;
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[phase(plugin)] extern crate quickcheck_macros;
