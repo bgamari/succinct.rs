@@ -242,4 +242,18 @@ mod test {
         let ans = if bit { bv.rank1(n as int) } else { bv.rank0(n as int) };
         TestResult::from_bool(ans == naive::rank(&bv, bit, n as int))
     }
+
+    #[quickcheck]
+    fn select_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
+        let bits = v.len() * 64;
+        if v.is_empty() || n >= bits {
+            return TestResult::discard()
+        }
+        let bv = Rank9::from_vec(v, bits as int);
+        match naive::select(&bv, bit, n as int) {
+            None => TestResult::discard(),
+            Some(ans) =>
+                TestResult::from_bool(ans == bv.select(bit, n as int))
+        }
+    }
 }
