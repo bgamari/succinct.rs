@@ -2,15 +2,6 @@
 ///
 /// Bit indices start at 0.
 
-fn pop_count(x: u64) -> int {
-    // Broadword sideways addition
-    let x0: u64 = x - ((x & 0xaaaa_aaaa_aaaa_aaaa) >> 1);
-    let x1: u64 = (x0 & 0x3333_3333_3333_3333) + ((x0 >> 2) & 0x3333_3333_3333_3333);
-    let x2: u64 = (x1 + (x1 >> 4)) & 0x0F0F0_F0F0_F0F0_F0F;
-    let l8: u64 = 0x0101_0101_0101_0101;
-    ((x2 * l8) >> 56) as int
-}
-
 pub trait BitAccess {
     /// Retrieve the `n`th bit
     fn get(&self, n: Pos) -> bool;
@@ -78,6 +69,38 @@ impl BitSelect for u64 {
         fail!("Not enough {} bits in {} to select({})", bit, *self, n0);
     }
 }
+
+/*
+fn pop_count(x: u64) -> int {
+    // Broadword sideways addition
+    let x0: u64 = x - ((x & 0xaaaa_aaaa_aaaa_aaaa) >> 1);
+    let x1: u64 = (x0 & 0x3333_3333_3333_3333) + ((x0 >> 2) & 0x3333_3333_3333_3333);
+    let x2: u64 = (x1 + (x1 >> 4)) & 0x0F0F0_F0F0_F0F0_F0F;
+    let l8: u64 = 0x0101_0101_0101_0101;
+    ((x2 * l8) >> 56) as int
+}
+
+/// Find the index of the `i`th one in `x`
+/// Based on Algorithm 2 from Vigna 2014
+fn bit_search(i: uint, x: u64) -> uint {
+    fn lt8(x: u64, y: u64) -> u64 {
+        let h8 = 0x8080808080808080;
+        (((x | h8) - (y & !h8)) ^ x ^ !y) & h8
+    }
+    fn gt8(x: u64, y: u64) -> u64 {}
+
+    let l8: u64 = 0x0101_0101_0101_0101;
+    let s0: u64 = x - ((x & 0xaaaa_aaaa_aaaa_aaaa) >> 1);
+    let s1: u64 = (x0 & 0x3333_3333_3333_3333) + ((x0 >> 2) & 0x3333_3333_3333_3333);
+    let s2: u64 = (x1 + (x1 >> 4)) & 0x0F0F0_F0F0_F0F0_F0F;
+    let s3: u64 = x2 * l8;
+    let b = (((lt8(s, r*l8) >> 7) * l8) >> 53) & !7;
+    let l = r - (((s << 8) >> b) & 0xff);
+    let s4: u64 = ((((x >> b) & 0xff) * l8 & gt8(0x8040201008040201, 0)) >> 7) * l8;
+    let res = b + (((lt8(s, l*l8) >> 7) * l8) >> 56);
+    res as uint
+}
+*/
 
 /// Out of range bits taken to be 0
 impl BitRank for u64 {
