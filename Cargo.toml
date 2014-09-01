@@ -7,7 +7,7 @@ authors = ["Ben Gamari <ben@smart-cactus.org>", "Laura Dietz <dietz@smart-cactus
 [lib]
 
 name = "succinct"
-path = "succinct/lib.rs"
+path = "src/lib.rs"
 
 [dependencies.quickcheck]
 
