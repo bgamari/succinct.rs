@@ -1,5 +1,6 @@
 use super::dictionary::{BitAccess};
 use super::dictionary as dict;
+use std::collections::Collection;
 
 /// A bit vector
 ///
@@ -30,6 +31,12 @@ impl BitVector {
             bits: length_in_bits,
             buffer: vec.clone()
         }
+    }
+}
+
+impl Collection for BitVector {
+    fn len(&self) -> uint {
+        self.bits as uint
     }
 }
 
