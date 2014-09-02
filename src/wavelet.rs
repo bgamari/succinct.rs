@@ -77,6 +77,18 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
         }
 }
 
+impl<Iter: Iterator<bool>, BitV: Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
+    fn rank(&self, sym: Sym, mut n: int) -> int {
+        let mut bits = sym.bit_iter();
+        let mut cursor = binary::Cursor::new(&self.tree);
+        for bit in bits {
+            debug_assert!(cursor.branch(binary::Left).is_some());
+            n = cursor.value.rank(bit, n);
+        }
+        n
+    }
+}
+
 impl<BitVBuilder, Sym> Builder<BitVBuilder, Sym> {
     pub fn new(new_bitvector: fn() -> BitVBuilder)
                -> Builder<BitVBuilder, Sym> {
