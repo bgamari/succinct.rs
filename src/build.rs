@@ -3,6 +3,13 @@
 pub trait Builder<E, T> {
     fn push(&mut self, element: &E);
     fn finish(self) -> T;
+
+    fn from_iter<Iter: Iterator<E>>(mut self, mut iter: Iter) -> T {
+        for i in iter {
+            self.push(&i);
+        }
+        self.finish()
+    }
 }
 
 /// Build a stream of `u64`s from a stream of bits
