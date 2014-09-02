@@ -23,7 +23,7 @@ impl<T: fmt::Show> fmt::Show for Tree<T> {
 
         fn go<T: Show>(tree: &Tree<T>, fmt: &mut fmt::Formatter, level: uint) -> fmt::Result {
             try!(indent(2*level, fmt));
-            try!("+ ".fmt(fmt));
+            try!(write!(fmt, "+ node {:p}    ", tree));
             try!(tree.value.fmt(fmt));
             try!("\n".fmt(fmt));
 
