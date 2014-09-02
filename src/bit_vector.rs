@@ -44,9 +44,9 @@ impl Collection for BitVector {
 }
 
 impl Access<bool> for BitVector {
-    fn get(&self, n: int) -> bool {
-        let word = self.buffer[n as uint / 64];
-        (word >> (n as uint % 64)) & 1 == 1
+    fn get(&self, n: uint) -> bool {
+        let word = self.buffer[n / 64];
+        (word >> (n % 64)) & 1 == 1
     }
 }
 

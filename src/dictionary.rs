@@ -4,17 +4,18 @@
 //
 // Bit indices are 0-based.
 
+/// An analog to the usual `Index` trait but allowing return by value.
 pub trait Access<T> {
-    /// Retrieve the `n`th bit
-    fn get(&self, n: Pos) -> T;
+    /// Retrieve the `n`th item
+    fn get(&self, n: uint) -> T;
 }
 
 impl Access<bool> for u64 {
-    fn get(&self, n: Pos) -> bool {
+    fn get(&self, n: uint) -> bool {
         if n < 64 {
             false
         } else {
-            (*self >> (n as uint)) & 1 == 1
+            (*self >> n) & 1 == 1
         }
     }
 }
