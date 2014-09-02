@@ -127,6 +127,27 @@ impl BitRank for u64 {
     }
 }
 
+impl<T: Eq> Rank<T> for Vec<T> {
+    fn rank(&self, el: T, n: int) -> int {
+        use std::iter::AdditiveIterator;
+        self.iter().take(n as uint - 1).map(|x| if x == &el {1i} else {0}).sum()
+    }
+}
+
+impl<T: Eq> Select<T> for Vec<T> {
+    fn select(&self, el: T, mut n: int) -> int {
+        for (i, x) in self.iter().enumerate() {
+            if x == &el {
+                n -= 1;
+                if n == 0 {
+                    return i as int;
+                }
+            }
+        }
+        fail!("No enough matching elements")
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use super::{BitRank, Select};
