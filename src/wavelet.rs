@@ -10,10 +10,18 @@ An unpacked wavelet tree.
 
 This representation is primarily intended for building.
 */
-struct Wavelet<'a, BitV: 'a, Sym> {
-    bits: BitV,
-    zeros: Option<&'a Wavelet<'a, BitV, Sym>>,
-    ones: Option<&'a Wavelet<'a, BitV, Sym>>,
+
+/// A binary tree with nodes labelled with `T`
+struct BinaryTree<'a, T: 'a> {
+    value: T,
+    left: Option<&'a mut BinaryTree<'a, T>>,
+    right: Option<&'a mut BinaryTree<'a, T>>,
+}
+
+impl<'a, T: 'a> BinaryTree<'a, T> {
+    pub fn singleton(value: T) -> BinaryTree<'a, T> {
+        BinaryTree {value: value, left: None, right: None}
+    }
 }
 
 /*
@@ -29,30 +37,34 @@ impl<BitV: Access<bool>, Sym: FromIterator<>>
 }
 */
 
+struct Wavelet<'a, BitV: 'a, Sym> {
+    tree: BinaryTree<'a, BitV>,
+}
+
 struct Builder<'a, BitVBuilder: 'a, Sym> {
     tree: Wavelet<'a, BitVBuilder, Sym>,
-    arena: TypedArena<Wavelet<'a, BitVBuilder, Sym>>,
-    new_bitvector: ||: 'a -> BitVBuilder,
+    arena: TypedArena<BinaryTree<'a, BitVBuilder>>,
+    new_bitvector: fn() -> BitVBuilder,
 }
 
 impl<'a, BitV, BitVBuilder: build::Builder<bool, BitV>,
-     Sym: BitIter<BI>, BI: Iterator<bool>>
+     BI: Iterator<bool>, Sym: BitIter<BI>>
     build::Builder<Sym, Wavelet<'a, BitV, Sym>>
     for Builder<'a, BitVBuilder, Sym> {
 
-        fn push(&mut self, element: &Sym) {
-            let mut node = &self.tree;
+        fn push(&'a mut self, element: &Sym) {
+            let mut node: &mut BinaryTree<'a, BitVBuilder> = &mut self.tree.tree;
             for bit in element.bit_iter() {
-                node.bits.push(&bit);
-                let next = if bit { &node.ones } else { &node.zeros };
-                match *next {
+                node.value.push(&bit);
+                let next = if bit { &node.right } else { &node.left };
+                node = match *next {
                     None => {
-                        //let new = self.new_node();
-                        //*next = Some(new);
+                        let new = self.new_node();
+                        *next = Some(new);
+                        new
                     },
-                    _    => { },
-                }
-                node = next.unwrap();
+                    Some(n) => n
+                };
             }
         }
 
@@ -62,22 +74,16 @@ impl<'a, BitV, BitVBuilder: build::Builder<bool, BitV>,
 }
 
 impl<'a, BitVBuilder, Sym> Builder<'a, BitVBuilder, Sym> {
-    fn new_node(&'a self) -> &'a Wavelet<'a, BitVBuilder, Sym> {
-        let node = Wavelet {
-            bits: (self.new_bitvector)(),
-            zeros: None,
-            ones: None,
-        };
+    fn new_node(&'a self) -> &'a mut BinaryTree<'a, BitVBuilder> {
+        let node = BinaryTree::singleton((self.new_bitvector)());
         self.arena.alloc(node)
     }
 
-    pub fn new(new_bitvector: ||: 'a -> BitVBuilder, depth: uint)
+    pub fn new(new_bitvector: fn() -> BitVBuilder, depth: uint)
                -> Builder<'a, BitVBuilder, Sym> {
         Builder {
             tree: Wavelet {
-                bits: (new_bitvector)(),
-                zeros: None,
-                ones: None,
+                tree: BinaryTree::singleton((new_bitvector)()),
             },
             arena: TypedArena::new(),
             new_bitvector: new_bitvector,
