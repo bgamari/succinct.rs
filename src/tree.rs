@@ -32,6 +32,20 @@ pub mod binary {
                 value: f(self.value),
             }
         }
+
+        pub fn branch(&self, branch: Branch) -> &Option<Box<Tree<T>>> {
+            match branch {
+                Left => &self.left,
+                Right => &self.right,
+            }
+        }
+
+        pub fn branch_mut(&mut self, branch: Branch) -> &mut Option<Box<Tree<T>>> {
+            match branch {
+                Left => &mut self.left,
+                Right => &mut self.right,
+            }
+        }
     }
 
     /// A child branch of a `Tree`

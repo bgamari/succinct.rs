@@ -1,10 +1,9 @@
 //! Wavelet trees
 
-use super::bit_vector;
 use super::bits::{BitIter};
 use super::build;
 use super::tree::binary::{Tree};
-use alloc::boxed::Box;
+use super::tree::binary;
 use std::fmt::Show;
 
 /*
@@ -36,24 +35,16 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
     for Builder<BitVBuilder, Sym> {
 
         fn push(&mut self, element: Sym) {
-            unsafe {
-                let mut node: *mut Tree<BitVBuilder> = &mut self.tree.tree;
-                for bit in element.bit_iter() {
-                    (*node).value.push(bit);
-                    println!("pushed {} to {:p}: {}", bit, node, (*node).value);
-                    let branch = if bit { &mut (*node).right } else { &mut (*node).left };
-                    let next = match branch {
-                        &Some(ref mut n) =>
-                            &mut **n as *mut Tree<BitVBuilder>,
-                        &None => {
-                            let mut new = box self.new_node();
-                            let ptr = &mut *new as *mut Tree<BitVBuilder>;
-                            *branch = Some(new);
-                            ptr
-                        },
-                    };
-                    node = next;
+            let new_bitvector = &self.new_bitvector;
+            let mut cursor = binary::Cursor::new(&mut self.tree.tree);
+            for bit in element.bit_iter() {
+                cursor.value.push(bit);
+                let branch = if bit {binary::Right} else {binary::Left};
+                match cursor.branch_mut(branch) {
+                    &Some(_) => {},
+                    n => *n = Some(box Tree::singleton((*new_bitvector)())),
                 }
+                cursor.move(branch);
             }
         }
 
@@ -63,11 +54,7 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
 }
 
 impl<BitVBuilder, Sym> Builder<BitVBuilder, Sym> {
-    fn new_node(&self) -> Tree<BitVBuilder> {
-        Tree::singleton((self.new_bitvector)())
-    }
-
-    pub fn new(new_bitvector: fn() -> BitVBuilder, depth: uint)
+    pub fn new(new_bitvector: fn() -> BitVBuilder)
                -> Builder<BitVBuilder, Sym> {
         Builder {
             tree: Wavelet {tree: Tree::singleton(new_bitvector())},
