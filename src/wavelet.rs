@@ -1,6 +1,7 @@
 //! Wavelet trees
 
 use super::bits::{BitIter};
+use super::dictionary::{Rank, Access};
 use super::build;
 use super::tree::binary::{Tree};
 use super::tree::binary;
@@ -8,41 +9,8 @@ use std::fmt::Show;
 
 fn bit_to_branch(bit: bool) -> binary::Branch {
     match bit {
-        True => binary::Right,
-        False => binary::Left,
-    }
-}
-
-mod access {
-    //! Access operation
-    use super::super::dictionary::Access;
-    use super::super::tree::binary::{Tree, Cursor};
-    use super::super::build::{Builder, Buildable};
-    use super::{Wavelet, bit_to_branch};
-
-    /// Iterator over the bits of symbol `i`
-    struct AccessIter<'a, BitV: 'a, Sym> {
-        cursor: Cursor<'a, BitV>
-    }
-
-    impl<BuilderT: Builder<bool, Sym>, BitV: Access<bool>, Sym: Buildable<bool, BuilderT>>
-        Access<Sym>
-        for Wavelet<BitV, Sym> {
-
-        fn get(&self, mut n: uint) -> Sym {
-            let builder: BuilderT = Buildable::new_builder();
-            let cursor = Cursor::new(&self.tree);
-            loop {
-                let bit = cursor.value.get(n);
-                builder.push(bit);
-                let branch = bit_to_branch(bit);
-                match cursor.branch(branch) {
-                    &None => break,
-                    &Some(_) => {}
-                }
-            }
-            builder.finish()
-        }
+        true => binary::Right,
+        false => binary::Left,
     }
 }
 
@@ -50,6 +18,25 @@ mod access {
 #[deriving(Show)]
 pub struct Wavelet<BitV, Sym> {
     tree: Tree<BitV>,
+}
+
+impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
+    /// TODO: This needs to turn into an `Access` impl once
+    /// `Buildable` has an associated `Builder` type
+    pub fn access<SymBuilder: build::Builder<bool, Sym>>(&self, mut builder: SymBuilder, mut n: uint) -> Sym {
+        let cursor = binary::Cursor::new(&self.tree);
+        loop {
+            let bit = cursor.value.get(n);
+            n = cursor.value.rank(&bit, n as int) as uint;
+            builder.push(bit);
+            let branch = bit_to_branch(bit);
+            match cursor.branch(branch) {
+                &None => break,
+                &Some(_) => {}
+            }
+        }
+        builder.finish()
+    }
 }
 
 /// Build up a wavelet tree from a sequence of symbols.

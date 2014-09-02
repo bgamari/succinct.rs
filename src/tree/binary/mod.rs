@@ -76,8 +76,8 @@ mod mut_cursor {
         pub fn move(&mut self, branch: Branch) {
             unsafe {
                 let b: &mut Option<Box<Tree<T>>> = match branch {
-                    Left => &mut (*self.node).left,
-                    Right => &mut (*self.node).right,
+                    super::Left => &mut (*self.node).left,
+                    super::Right => &mut (*self.node).right,
                 };
                 match b {
                     &None => fail!("Attempted to move {} into empty branch", branch),
@@ -126,16 +126,16 @@ mod cursor {
         }
 
         /// Move the cursor back to the root
-        pub fn back_to_root(&self) {
+        pub fn back_to_root(&mut self) {
             self.node = self.root as *const Tree<T>;
         }
 
         /// Descend down one of the branches
-        pub fn move(&self, branch: Branch) {
+        pub fn move(&mut self, branch: Branch) {
             unsafe {
                 let b: &Option<Box<Tree<T>>> = match branch {
-                    Left => &(*self.node).left,
-                    Right => &(*self.node).right,
+                    super::Left => &(*self.node).left,
+                    super::Right => &(*self.node).right,
                 };
                 match b {
                     &None => fail!("Attempted to move {} into empty branch", branch),

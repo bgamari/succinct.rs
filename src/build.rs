@@ -1,6 +1,6 @@
 //! Traits for building up objects incrementally
 
-pub use build::buildable::Buildable;
+pub use build::buildable::{Buildable, PrimBuilder};
 
 pub trait Builder<E, T> {
     fn push(&mut self, element: E);
@@ -98,7 +98,7 @@ mod buildable {
     /// A trait for things that can be built from elements of type `E`
     pub trait Buildable<E, BuilderT: Builder<E, Self>> {
         // TODO: Associated type
-        pub fn new_builder() -> BuilderT;
+        fn new_builder() -> BuilderT;
     }
 
     /// Build primitive values from their bits (least significant bit first)
