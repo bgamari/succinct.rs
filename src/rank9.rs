@@ -106,7 +106,6 @@ impl Rank9 {
     pub fn from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
         use super::build::Builder;
         let mut builder = build::CountsBuilder::with_capacity(v.len());
-        //v.iter().map(|x| builder.push(x));
         for x in v.iter() {
             builder.push(x);
         }
