@@ -1,7 +1,6 @@
 //! A simple bit-vector
 
 use super::dictionary::{Access, Rank, BitRank, Select};
-use super::dictionary as dict;
 use std::collections::Collection;
 pub use bit_vector::build::Builder;
 
