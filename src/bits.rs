@@ -32,9 +32,10 @@ impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> Iterator<bool> for BitIterator
         match self.bit {
             0 => None,
             _ => {
+                let res = Some(!(self.x & One::one()).is_zero());
                 self.bit -= 1;
                 self.x = self.x >> 1;
-                Some(!(self.x & One::one()).is_zero())
+                res
             }
         }
     }
