@@ -82,8 +82,11 @@ impl<Iter: Iterator<bool>, BitV: Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for W
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
         for bit in bits {
-            debug_assert!(cursor.branch(binary::Left).is_some());
             n = cursor.value.rank(bit, n);
+            match cursor.branch(bit_to_branch(bit)) {
+                &None    => return 0,
+                &Some(_) => cursor.move(bit_to_branch(bit)),
+            }
         }
         n
     }
