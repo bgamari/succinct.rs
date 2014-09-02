@@ -2,10 +2,11 @@
 ///
 /// See Vigna 2014.
 
-use super::num::integer::Integer;
+use num::integer::Integer;
 use std::num::{zero, One, one, Int};
 use super::dictionary::{BitRank, Select, Access};
 use std::collections::Collection;
+use utils::div_ceil;
 
 use std::fmt::Show;
 
@@ -74,14 +75,6 @@ impl Access<bool> for Rank9 {
 impl Collection for Rank9 {
     fn len(&self) -> uint {
         self.bits as uint
-    }
-}
-
-fn div_ceil<T: Integer>(a: T, b: T) -> T {
-    if a % b != zero() {
-        a / b + one()
-    } else {
-        a / b
     }
 }
 

@@ -13,3 +13,4 @@ pub mod bit_vector;
 pub mod rank9;
 pub mod naive;
 pub mod bits;
+pub mod utils;
