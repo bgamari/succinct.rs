@@ -8,7 +8,7 @@
 
 use num::integer::Integer;
 use std::num::{One, one, Int};
-use super::dictionary::{BitRank, Select, Access};
+use super::dictionary::{Rank, BitRank, Select, Access};
 use std::collections::Collection;
 
 pub use rank9::build::Builder;
@@ -114,6 +114,12 @@ impl Rank9 {
             buffer: v.clone(), // TODO: no clone
             counts: builder.finish(),
         };
+    }
+}
+
+impl Rank<bool> for Rank9 {
+    fn rank(&self, el: &bool, n: int) -> int {
+        if *el {self.rank1(n)} else {self.rank0(n)}
     }
 }
 

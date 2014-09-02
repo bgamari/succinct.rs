@@ -31,16 +31,6 @@ pub trait Rank<T> {
     fn rank(&self, el: &T, n: Pos) -> Count;
 }
 
-impl<T: BitRank> Rank<bool> for T {
-    fn rank(&self, el: &bool, n: Pos) -> Count {
-        if *el {
-            self.rank1(n)
-        } else {
-            self.rank0(n)
-        }
-    }
-}
-
 /// Select operation
 pub trait Select<T> {
     /// Given a sequence, `select(n)` is the 0-based position

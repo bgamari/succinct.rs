@@ -1,6 +1,6 @@
 //! A simple bit-vector
 
-use super::dictionary::{Access};
+use super::dictionary::{Access, Rank, BitRank, Select};
 use super::dictionary as dict;
 use std::collections::Collection;
 pub use bit_vector::build::Builder;
@@ -51,7 +51,13 @@ impl Access<bool> for BitVector {
     }
 }
 
-impl dict::BitRank for BitVector {
+impl Rank<bool> for BitVector {
+    fn rank(&self, el: &bool, n: int) -> int {
+        if *el {self.rank1(n)} else {self.rank0(n)}
+    }
+}
+
+impl BitRank for BitVector {
     fn rank0(&self, n: int) -> int {
         n - self.rank1(n)
     }
@@ -70,7 +76,7 @@ impl dict::BitRank for BitVector {
     }
 }
 
-impl dict::Select<bool> for BitVector {
+impl Select<bool> for BitVector {
     #[inline(always)]
     fn select(&self, bit: &bool, n: int) -> int {
         let bit: bool = *bit;
