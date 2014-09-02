@@ -49,7 +49,11 @@ impl<T, B: Builder<u64, T>> Builder<bool, (T, uint)> for BitBuilder<B> {
     }
 
     #[inline(always)]
-    fn finish(self) -> (T, uint) {
+    fn finish(mut self) -> (T, uint) {
+        // push partial word
+        if self.bit % 64 != 0 {
+            self.builder.push(self.accum);
+        }
         (self.builder.finish(), self.size)
     }
 }
