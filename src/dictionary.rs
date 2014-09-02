@@ -101,6 +101,12 @@ fn bit_search(i: uint, x: u64) -> uint {
 }
 */
 
+impl Rank<bool> for u64 {
+    fn rank(&self, bit: &bool, n: int) -> int {
+        if *bit {self.rank1(n)} else {self.rank0(n)}
+    }
+}
+
 /// Out of range bits taken to be 0
 impl BitRank for u64 {
     fn rank1(&self, n: int) -> int {
