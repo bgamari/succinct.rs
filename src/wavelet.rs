@@ -118,3 +118,26 @@ impl FlatWavelet<BitV, Sym> {
     }
 }
 */
+
+#[cfg(test)]
+mod test {
+    use quickcheck::TestResult;
+    use super::super::dictionary::Rank;
+    use super::super::build::Builder;
+
+    #[quickcheck]
+    fn rank_is_correct(el: u8, v: Vec<u8>, n: uint) -> TestResult {
+        use super::super::bit_vector;
+        fn new_bitvector() -> bit_vector::Builder {
+           bit_vector::Builder::with_capacity(128)
+        }
+
+        if v.is_empty() || n >= v.len() {
+            return TestResult::discard()
+        }
+
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let ans = wavelet.rank(el, n as int);
+        TestResult::from_bool(ans == v.rank(el, n as int))
+    }
+}
