@@ -75,12 +75,12 @@ pub mod binary {
         /// Descend down one of the branches
         pub fn move(&mut self, branch: Branch) {
             unsafe {
-                let branch: &mut Option<Box<Tree<T>>> = match branch {
+                let b: &mut Option<Box<Tree<T>>> = match branch {
                     Left => &mut (*self.node).left,
                     Right => &mut (*self.node).right,
                 };
-                match branch {
-                    &None => fail!("Attempted to move {} into empty branch"),
+                match b {
+                    &None => fail!("Attempted to move {} into empty branch", branch),
                     &Some(ref mut child) => {
                         self.node = &mut **child as *mut Tree<T>;
                     }
