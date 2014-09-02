@@ -24,15 +24,16 @@ impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
     /// TODO: This needs to turn into an `Access` impl once
     /// `Buildable` has an associated `Builder` type
     pub fn access<SymBuilder: build::Builder<bool, Sym>>(&self, mut builder: SymBuilder, mut n: uint) -> Sym {
-        let cursor = binary::Cursor::new(&self.tree);
+        let mut cursor = binary::Cursor::new(&self.tree);
         loop {
             let bit = cursor.value.get(n);
             n = cursor.value.rank(&bit, n as int) as uint;
             builder.push(bit);
             let branch = bit_to_branch(bit);
+            println!("on node {:p}", &*cursor);
             match cursor.branch(branch) {
                 &None => break,
-                &Some(_) => {}
+                &Some(_) => cursor.move(branch),
             }
         }
         builder.finish()
