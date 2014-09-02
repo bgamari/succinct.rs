@@ -113,53 +113,6 @@ impl Rank9 {
             counts: builder.finish(),
         };
     }
-
-    pub fn old_from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
-        let n_blocks = div_ceil(length_in_bits, 64*8);
-        let mut v = v.clone(); // FIXME
-        assert!(length_in_bits > 0);
-
-        // add padding to end as necessary
-        if length_in_bits % (64*8) != 0 {
-            let padding = 8*n_blocks as uint - v.len();
-            v.grow(padding, &0);
-        }
-
-        // compute counts
-        let mut counts: Vec<Counts> = Vec::with_capacity(n_blocks as uint);
-        let mut accum = Counts { _block_rank: 0, word_ranks: 0 };
-        // accumulate number of ones in this block
-        let mut block_accum: u64 = 0;
-        // accumulate number of ones
-        let mut rank_accum: u64 = 0;
-        for (i, word) in v.iter().enumerate() {
-            let ones = word.count_ones();
-            rank_accum += ones;
-            block_accum += ones;
-            if i % 8 == 7 {
-                // push new block
-                counts.push(accum);
-                block_accum = 0;
-                accum._block_rank = rank_accum;
-                accum.word_ranks = 0;
-            } else {
-                accum.word_ranks >>= 9;
-                accum.word_ranks |= block_accum << (9*6);
-            }
-        }
-        /*
-        for blk in counts.iter() {
-            println!("block rank {}", blk._block_rank);
-            for i in range(0u,7) { println!("{} {}", i, blk.word_rank(true, i+1)); }
-        }
-        */
-
-        Rank9 {
-            bits: length_in_bits,
-            buffer: v,
-            counts: counts,
-        }
-    }
 }
 
 impl BitRank for Rank9 {
