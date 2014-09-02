@@ -130,7 +130,10 @@ impl BitRank for u64 {
 impl<T: Eq> Rank<T> for Vec<T> {
     fn rank(&self, el: T, n: int) -> int {
         use std::iter::AdditiveIterator;
-        self.iter().take(n as uint - 1).map(|x| if x == &el {1i} else {0}).sum()
+        match n {
+            0 => 0,
+            _ => self.iter().take(n as uint - 1).map(|x| if x == &el {1i} else {0}).sum()
+        }
     }
 }
 
