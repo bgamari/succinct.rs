@@ -3,24 +3,36 @@
 use super::bit_vector;
 use super::bits::{BitIter};
 use super::build;
-use arena::TypedArena;
-
-/**
-An unpacked wavelet tree.
-
-This representation is primarily intended for building.
-*/
+use alloc::boxed::Box;
+use std::fmt::Show;
 
 /// A binary tree with nodes labelled with `T`
-struct BinaryTree<'a, T: 'a> {
+#[deriving(Show)]
+struct BinaryTree<T> {
     value: T,
-    left: Option<&'a mut BinaryTree<'a, T>>,
-    right: Option<&'a mut BinaryTree<'a, T>>,
+    left: Option<Box<BinaryTree<T>>>,
+    right: Option<Box<BinaryTree<T>>>,
 }
 
-impl<'a, T: 'a> BinaryTree<'a, T> {
-    pub fn singleton(value: T) -> BinaryTree<'a, T> {
+impl<T> BinaryTree<T> {
+    pub fn singleton(value: T) -> BinaryTree<T> {
         BinaryTree {value: value, left: None, right: None}
+    }
+
+    pub fn map<V>(&self, f: |&T| -> V) -> BinaryTree<V> {
+        BinaryTree {
+            left: self.left.as_ref().map(|x| box x.map(|y| f(y))),
+            right: self.right.as_ref().map(|x| box x.map(|y| f(y))),
+            value: f(&self.value),
+        }
+    }
+
+    pub fn map_move<V>(self, f: |T| -> V) -> BinaryTree<V> {
+        BinaryTree {
+            left: self.left.map(|x| box x.map_move(|y| f(y))),
+            right: self.right.map(|x| box x.map_move(|y| f(y))),
+            value: f(self.value),
+        }
     }
 }
 
@@ -37,55 +49,57 @@ impl<BitV: Access<bool>, Sym: FromIterator<>>
 }
 */
 
-struct Wavelet<'a, BitV: 'a, Sym> {
-    tree: BinaryTree<'a, BitV>,
+#[deriving(Show)]
+pub struct Wavelet<BitV, Sym> {
+    tree: BinaryTree<BitV>,
 }
 
-struct Builder<'a, BitVBuilder: 'a, Sym> {
-    tree: Wavelet<'a, BitVBuilder, Sym>,
-    arena: TypedArena<BinaryTree<'a, BitVBuilder>>,
+pub struct Builder<BitVBuilder, Sym> {
+    tree: Wavelet<BitVBuilder, Sym>,
     new_bitvector: fn() -> BitVBuilder,
 }
 
-impl<'a, BitV, BitVBuilder: build::Builder<bool, BitV>,
+impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
      BI: Iterator<bool>, Sym: BitIter<BI>>
-    build::Builder<Sym, Wavelet<'a, BitV, Sym>>
-    for Builder<'a, BitVBuilder, Sym> {
+    build::Builder<Sym, Wavelet<BitV, Sym>>
+    for Builder<BitVBuilder, Sym> {
 
-        fn push(&'a mut self, element: Sym) {
-            let mut node: &mut BinaryTree<'a, BitVBuilder> = &mut self.tree.tree;
-            for bit in element.bit_iter() {
-                node.value.push(bit);
-                let next = if bit { &node.right } else { &node.left };
-                node = match *next {
-                    None => {
-                        let new = self.new_node();
-                        *next = Some(new);
-                        new
-                    },
-                    Some(n) => n
-                };
+        fn push(&mut self, element: Sym) {
+            unsafe {
+                let mut node: *mut BinaryTree<BitVBuilder> = &mut self.tree.tree;
+                for bit in element.bit_iter() {
+                    (*node).value.push(bit);
+                    println!("pushed {} to {:p}: {}", bit, node, (*node).value);
+                    let branch = if bit { &mut (*node).right } else { &mut (*node).left };
+                    let next = match branch {
+                        &Some(ref mut n) =>
+                            &mut **n as *mut BinaryTree<BitVBuilder>,
+                        &None => {
+                            let mut new = box self.new_node();
+                            let ptr = &mut *new as *mut BinaryTree<BitVBuilder>;
+                            *branch = Some(new);
+                            ptr
+                        },
+                    };
+                    node = next;
+                }
             }
         }
 
-        fn finish(self) -> Wavelet<'a, BitV, Sym> {
-            fail!("FIXME");
+        fn finish(self) -> Wavelet<BitV, Sym> {
+            Wavelet { tree: self.tree.tree.map_move(|b| b.finish()) }
         }
 }
 
-impl<'a, BitVBuilder, Sym> Builder<'a, BitVBuilder, Sym> {
-    fn new_node(&'a self) -> &'a mut BinaryTree<'a, BitVBuilder> {
-        let node = BinaryTree::singleton((self.new_bitvector)());
-        self.arena.alloc(node)
+impl<BitVBuilder, Sym> Builder<BitVBuilder, Sym> {
+    fn new_node(&self) -> BinaryTree<BitVBuilder> {
+        BinaryTree::singleton((self.new_bitvector)())
     }
 
     pub fn new(new_bitvector: fn() -> BitVBuilder, depth: uint)
-               -> Builder<'a, BitVBuilder, Sym> {
+               -> Builder<BitVBuilder, Sym> {
         Builder {
-            tree: Wavelet {
-                tree: BinaryTree::singleton((new_bitvector)()),
-            },
-            arena: TypedArena::new(),
+            tree: Wavelet {tree: BinaryTree::singleton(new_bitvector())},
             new_bitvector: new_bitvector,
         }
     }

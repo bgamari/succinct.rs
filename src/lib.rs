@@ -4,7 +4,7 @@
 #![feature(phase)]
 
 extern crate core;
-extern crate arena;
+extern crate alloc;
 extern crate num;
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[phase(plugin)] extern crate quickcheck_macros;
