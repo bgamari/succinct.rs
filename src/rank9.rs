@@ -3,12 +3,11 @@
 /// See Vigna 2014.
 
 use num::integer::Integer;
-use std::num::{zero, One, one, Int};
+use std::num::{One, one, Int};
 use super::dictionary::{BitRank, Select, Access};
 use std::collections::Collection;
-use utils::div_ceil;
 
-use std::fmt::Show;
+pub use rank9::build::Builder;
 
 /// Counts for a basic block
 struct Counts {
@@ -158,7 +157,7 @@ enum BinarySearchResult<T> {
     NotFound(T),
 }
 
-fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone + Show>(
+fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
         cmp: |&T| -> Ordering, lower: T, upper: T)
         -> BinarySearchResult<T> {
     let mut base : T = lower.clone();
