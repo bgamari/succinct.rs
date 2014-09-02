@@ -101,6 +101,20 @@ impl Rank9 {
     }
 
     pub fn from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
+        use super::build::Builder;
+        let mut builder = build::CountsBuilder::with_capacity(v.len());
+        //v.iter().map(|x| builder.push(x));
+        for x in v.iter() {
+            builder.push(x);
+        }
+        return Rank9 {
+            bits: length_in_bits,
+            buffer: v.clone(), // TODO: no clone
+            counts: builder.finish(),
+        };
+    }
+
+    pub fn old_from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
         let n_blocks = div_ceil(length_in_bits, 64*8);
         let mut v = v.clone(); // FIXME
         assert!(length_in_bits > 0);
@@ -133,6 +147,12 @@ impl Rank9 {
                 accum.word_ranks |= block_accum << (9*6);
             }
         }
+        /*
+        for blk in counts.iter() {
+            println!("block rank {}", blk._block_rank);
+            for i in range(0u,7) { println!("{} {}", i, blk.word_rank(true, i+1)); }
+        }
+        */
 
         Rank9 {
             bits: length_in_bits,
@@ -219,6 +239,128 @@ impl Select<bool> for Rank9 {
         let word: u64 = self.buffer[word_idx + 8*block_idx];
         remaining -= counts.word_rank(bit, word_idx) as int;
         (block_idx as int)*64*8 + (word_idx as int) * 64 + word.select(&bit, remaining)
+    }
+}
+
+mod build {
+    use super::super::build;
+    use super::{Counts, Rank9};
+    use utils::div_ceil;
+
+    /// Build up the counts metadata for rank-9 from a stream of `u64`s
+    pub struct CountsBuilder {
+        /// length in broadwords
+        length: uint,
+        counts: Vec<Counts>,
+        /// accumulate `Counts` for the current block
+        accum: Counts,
+        /// accumulate number of ones in the current block
+        block_accum: u64,
+        /// accumulate number of ones total
+        rank_accum: u64,
+    }
+
+    impl CountsBuilder {
+        /// Create a `CountsBuilder` with capacity for `cap` broadwords.
+        pub fn with_capacity(cap: uint) -> CountsBuilder {
+            let n_blocks = div_ceil(cap, 64*8);
+            CountsBuilder {
+                length: 0,
+                counts: Vec::with_capacity(n_blocks as uint),
+                accum: Counts { _block_rank: 0, word_ranks: 0 },
+                block_accum: 0,
+                rank_accum: 0,
+            }
+        }
+
+        fn push_block(&mut self) {
+            self.counts.push(self.accum);
+            self.block_accum = 0;
+            self.accum._block_rank = self.rank_accum;
+            self.accum.word_ranks = 0;
+        }
+    }
+
+    impl build::Builder<u64, Vec<Counts>> for CountsBuilder {
+        fn push(&mut self, word: &u64) {
+            let ones = word.count_ones();
+            self.rank_accum += ones;
+            self.block_accum += ones;
+            if self.length % 8 == 7 {
+                self.push_block();
+            } else {
+                self.accum.word_ranks >>= 9;
+                self.accum.word_ranks |= self.block_accum << (9*6);
+            }
+            self.length += 1;
+        }
+
+        fn finish(mut self) -> Vec<Counts> {
+            // Finish up final partial block
+            while self.length % 8 != 0 {
+                self.push(&0);
+            }
+            self.counts
+        }
+    }
+
+    /// Build a rank-9 bitvector from broadwords
+    pub struct WordBuilder {
+        builder: CountsBuilder,
+        buffer: Vec<u64>,
+    }
+
+    impl WordBuilder {
+        /// Create a `WordBuilder` with capacity for `cap` broadwords
+        pub fn with_capacity(cap: uint) -> WordBuilder {
+            WordBuilder {
+                builder: CountsBuilder::with_capacity(cap),
+                buffer: Vec::with_capacity(cap),
+            }
+        }
+    }
+
+    impl build::Builder<u64, Rank9> for WordBuilder {
+        fn push(&mut self, word: &u64) {
+            self.builder.push(word);
+            self.buffer.push(*word);
+        }
+        fn finish(self) -> Rank9 {
+            Rank9 {
+                bits: 64*self.builder.length as int,
+                buffer: self.buffer,
+                counts: self.builder.finish(),
+            }
+        }
+    }
+
+    /// Build a `Rank9` bitvector from bits
+    pub struct Builder {
+        builder: build::BitBuilder<WordBuilder>,
+    }
+
+    impl Builder {
+        /// Build a rank-9 bitvector with capacity for `cap` bits
+        pub fn with_capacity(cap: uint) -> Builder {
+            let b: WordBuilder = WordBuilder::with_capacity(64*cap);
+            Builder {
+                builder: build::BitBuilder::new(b)
+            }
+        }
+    }
+
+    impl build::Builder<bool, Rank9> for Builder {
+        fn push(&mut self, bit: &bool) {
+            self.builder.push(bit)
+        }
+        fn finish(self) -> Rank9 {
+            match self.builder.finish() {
+                (mut rank9, bits) => {
+                    rank9.bits = bits as int;
+                    rank9
+                }
+            }
+        }
     }
 }
 

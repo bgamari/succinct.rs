@@ -14,3 +14,4 @@ pub mod rank9;
 pub mod naive;
 pub mod bits;
 pub mod utils;
+pub mod build;
