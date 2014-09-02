@@ -35,6 +35,7 @@ impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> Iterator<bool> for BitIterator
 
 /// A trait for types for which one can get an iterator over bits
 pub trait BitIter<Iter: Iterator<bool>> {
+// TODO: associated type here
     fn bit_iter(&self) -> Iter;
 }
 
