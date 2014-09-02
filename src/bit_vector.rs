@@ -112,7 +112,7 @@ mod build {
     }
 
     impl build::Builder<bool, BitVector> for Builder {
-        fn push(&mut self, bit: &bool) {
+        fn push(&mut self, bit: bool) {
             self.builder.push(bit)
         }
         fn finish(self) -> BitVector {

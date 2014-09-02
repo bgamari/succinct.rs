@@ -107,7 +107,7 @@ impl Rank9 {
         use super::build::Builder;
         let mut builder = build::CountsBuilder::with_capacity(v.len());
         for x in v.iter() {
-            builder.push(x);
+            builder.push(*x);
         }
         return Rank9 {
             bits: length_in_bits,
@@ -237,7 +237,7 @@ mod build {
     }
 
     impl build::Builder<u64, Vec<Counts>> for CountsBuilder {
-        fn push(&mut self, word: &u64) {
+        fn push(&mut self, word: u64) {
             let ones = word.count_ones();
             self.rank_accum += ones;
             self.block_accum += ones;
@@ -253,7 +253,7 @@ mod build {
         fn finish(mut self) -> Vec<Counts> {
             // Finish up final partial block
             while self.length % 8 != 0 {
-                self.push(&0);
+                self.push(0);
             }
             self.counts
         }
@@ -276,9 +276,9 @@ mod build {
     }
 
     impl build::Builder<u64, Rank9> for WordBuilder {
-        fn push(&mut self, word: &u64) {
+        fn push(&mut self, word: u64) {
             self.builder.push(word);
-            self.buffer.push(*word);
+            self.buffer.push(word);
         }
         fn finish(self) -> Rank9 {
             Rank9 {
@@ -305,7 +305,7 @@ mod build {
     }
 
     impl build::Builder<bool, Rank9> for Builder {
-        fn push(&mut self, bit: &bool) {
+        fn push(&mut self, bit: bool) {
             self.builder.push(bit)
         }
         fn finish(self) -> Rank9 {

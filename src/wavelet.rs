@@ -52,10 +52,10 @@ impl<'a, BitV, BitVBuilder: build::Builder<bool, BitV>,
     build::Builder<Sym, Wavelet<'a, BitV, Sym>>
     for Builder<'a, BitVBuilder, Sym> {
 
-        fn push(&'a mut self, element: &Sym) {
+        fn push(&'a mut self, element: Sym) {
             let mut node: &mut BinaryTree<'a, BitVBuilder> = &mut self.tree.tree;
             for bit in element.bit_iter() {
-                node.value.push(&bit);
+                node.value.push(bit);
                 let next = if bit { &node.right } else { &node.left };
                 node = match *next {
                     None => {

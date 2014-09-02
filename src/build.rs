@@ -1,12 +1,12 @@
 //! Traits for building up objects incrementally
 
 pub trait Builder<E, T> {
-    fn push(&mut self, element: &E);
+    fn push(&mut self, element: E);
     fn finish(self) -> T;
 
     fn from_iter<Iter: Iterator<E>>(mut self, mut iter: Iter) -> T {
         for i in iter {
-            self.push(&i);
+            self.push(i);
         }
         self.finish()
     }
@@ -34,12 +34,12 @@ impl<B> BitBuilder<B> {
 /// Returns both result and size in bits
 impl<T, B: Builder<u64, T>> Builder<bool, (T, uint)> for BitBuilder<B> {
     #[inline(always)]
-    fn push(&mut self, element: &bool) {
-        self.accum |= (*element as u64) << self.bit;
+    fn push(&mut self, element: bool) {
+        self.accum |= (element as u64) << self.bit;
         self.bit += 1;
         self.size += 1;
         if self.bit == 64 {
-            self.builder.push(&self.accum);
+            self.builder.push(self.accum);
             self.bit = 0;
             self.accum = 0;
         }
@@ -65,8 +65,8 @@ impl<T> VecBuilder<T> {
 }
 
 impl<T: Clone> Builder<T, Vec<T>> for VecBuilder<T> {
-    fn push(&mut self, e: &T) {
-        self.buffer.push((*e).clone());
+    fn push(&mut self, e: T) {
+        self.buffer.push(e);
     }
     fn finish(self) -> Vec<T> {
         self.buffer
@@ -74,10 +74,10 @@ impl<T: Clone> Builder<T, Vec<T>> for VecBuilder<T> {
 }
 
 /// A pair of `Builder`s is also a `Builder`
-impl<T, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)> for (A, B) {
-    fn push(&mut self, e: &T) {
+impl<T: Clone, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)> for (A, B) {
+    fn push(&mut self, e: T) {
         let (ref mut a, ref mut b) = *self;
-        a.push(e);
+        a.push(e.clone());
         b.push(e);
     }
     fn finish(self) -> (RA, RB) {
