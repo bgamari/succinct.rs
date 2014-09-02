@@ -1,6 +1,7 @@
 use super::dictionary::{Access};
 use super::dictionary as dict;
 use std::collections::Collection;
+pub use bit_vector::build::Builder;
 
 /// A bit vector
 ///
@@ -85,6 +86,38 @@ impl dict::Select<bool> for BitVector {
             }
         }
         idx + cur.select(&bit, remain - 1)
+    }
+}
+
+mod build {
+    use super::super::build;
+    use super::super::utils::div_ceil;
+    use super::BitVector;
+
+    /// Build a `BitVector` from bits
+    pub struct Builder {
+        builder: build::BitBuilder<build::VecBuilder<u64>>,
+    }
+
+    impl Builder {
+        /// Build a bitvector with capacity for `cap` bits
+        pub fn with_capacity(cap: uint) -> Builder {
+            let words = div_ceil(cap, 64);
+            Builder {
+                builder: build::BitBuilder::new(build::VecBuilder::with_capacity(words)),
+            }
+        }
+    }
+
+    impl build::Builder<bool, BitVector> for Builder {
+        fn push(&mut self, bit: &bool) {
+            self.builder.push(bit)
+        }
+        fn finish(self) -> BitVector {
+            match self.builder.finish() {
+                (vec, bits) => BitVector { bits: bits as int, buffer: vec }
+            }
+        }
     }
 }
 
