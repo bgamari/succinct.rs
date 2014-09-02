@@ -1,3 +1,5 @@
+//! Various traits for working with bits and objects composed of them
+
 use std::ops::{Shr, BitAnd};
 use std::iter::Iterator;
 use std::num::{One, Zero};

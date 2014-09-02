@@ -1,9 +1,11 @@
+//! A simple bit-vector
+
 use super::dictionary::{Access};
 use super::dictionary as dict;
 use std::collections::Collection;
 pub use bit_vector::build::Builder;
 
-/// A bit vector
+/// A simple bit vector
 ///
 /// The first bit in the vector is the least-significant bit of the
 /// first broadword

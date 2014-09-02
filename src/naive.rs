@@ -1,3 +1,5 @@
+//! Exceedingly naive implementations for dictionary operations
+
 use super::dictionary::{Access};
 use std::collections::Collection;
 use std::option::{Option, Some, None};

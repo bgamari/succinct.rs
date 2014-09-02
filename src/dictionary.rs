@@ -1,6 +1,8 @@
-/// Rank and select operations
-///
-/// Bit indices start at 0.
+//! Dictionary traits
+//
+// A dictionary is an object which supports `rank` and `select` queries.
+//
+// Bit indices are 0-based.
 
 pub trait Access<T> {
     /// Retrieve the `n`th bit

@@ -1,3 +1,5 @@
+//! Traits for building up objects incrementally
+
 pub trait Builder<E, T> {
     fn push(&mut self, element: &E);
     fn finish(self) -> T;

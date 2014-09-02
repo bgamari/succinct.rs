@@ -1,3 +1,5 @@
+//! Utilities
+
 use std::num::{zero, one};
 use num::integer::Integer;
 
