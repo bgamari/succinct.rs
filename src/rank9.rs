@@ -1,6 +1,10 @@
-/// rank9 bitvector
-///
-/// See Vigna 2014.
+//! Rank9 bitvector
+//
+// Rank9 supports efficient rank and select operations. This
+// implementation uses `rank9`-proper for `rank` and an approximation
+// of the `simple` algorithm described by Vigna for `select`.
+//
+// See Vigna 2014.
 
 use num::integer::Integer;
 use std::num::{One, one, Int};
