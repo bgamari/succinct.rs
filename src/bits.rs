@@ -18,6 +18,12 @@ impl<T> BitIterator<T> {
             x: x,
         }
     }
+    pub fn with_width(bits: uint, x: T) -> BitIterator<T> {
+        BinIterator {
+            bit: bits,
+            x: x
+        }
+    }
 }
 
 impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> Iterator<bool> for BitIterator<T> {
@@ -35,13 +41,13 @@ impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> Iterator<bool> for BitIterator
 
 /// A trait for types for which one can get an iterator over bits
 pub trait BitIter<Iter: Iterator<bool>> {
-// TODO: associated type here
-    fn bit_iter(&self) -> Iter;
+    // TODO: associated type here
+    fn bit_iter(self) -> Iter;
 }
 
-impl BitIter<BitIterator<u64>> for u64 {
-    fn bit_iter(&self) -> BitIterator<u64> {
-        BitIterator::new(*self)
+impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> BitIter<BitIterator<T>> for T {
+    fn bit_iter(self) -> BitIterator<T> {
+        BitIterator::new(self)
     }
 }
 
