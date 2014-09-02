@@ -18,8 +18,9 @@ impl<T> BitIterator<T> {
             x: x,
         }
     }
+
     pub fn with_width(bits: uint, x: T) -> BitIterator<T> {
-        BinIterator {
+        BitIterator {
             bit: bits,
             x: x
         }
