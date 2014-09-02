@@ -28,14 +28,14 @@ pub type Count = int;
 
 /// Rank operation
 pub trait Rank<T> {
-    fn rank(&self, el: &T, n: Pos) -> Count;
+    fn rank(&self, el: T, n: Pos) -> Count;
 }
 
 /// Select operation
 pub trait Select<T> {
     /// Given a sequence, `select(n)` is the 0-based position
     /// of the `n`th zero.
-    fn select(&self, el: &T, n: Count) -> Pos;
+    fn select(&self, el: T, n: Count) -> Pos;
 }
 
 /// Rank operation on binary sequences.
@@ -50,8 +50,7 @@ pub trait BitRank {
 }
 
 impl Select<bool> for u64 {
-    fn select(&self, bit: &bool, n0: Count) -> Pos {
-        let bit: bool = *bit;
+    fn select(&self, bit: bool, n0: Count) -> Pos {
         let mut idx: int = 0;
         let mut x: u64 = *self;
         let mut n: int = n0;
@@ -102,8 +101,8 @@ fn bit_search(i: uint, x: u64) -> uint {
 */
 
 impl Rank<bool> for u64 {
-    fn rank(&self, bit: &bool, n: int) -> int {
-        if *bit {self.rank1(n)} else {self.rank0(n)}
+    fn rank(&self, bit: bool, n: int) -> int {
+        if bit {self.rank1(n)} else {self.rank0(n)}
     }
 }
 
@@ -134,8 +133,8 @@ pub mod test {
 
     #[test]
     pub fn test_u64_select() {
-        assert_eq!(0x5u64.select(&true, 0), 0);
-        assert_eq!(0x5u64.select(&true, 1), 2);
+        assert_eq!(0x5u64.select(true, 0), 0);
+        assert_eq!(0x5u64.select(true, 1), 2);
     }
 
     pub fn test_select0<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
@@ -157,7 +156,7 @@ pub mod test {
             (127, 5+2*64),
         );
         for &(rank, select) in select0.iter() {
-            let a = bv.select(&false, rank);
+            let a = bv.select(false, rank);
             if a != select {
                 fail!("select0({}) failed: expected {}, saw {}", rank, select, a);
             }
@@ -176,7 +175,7 @@ pub mod test {
             (5, (3+2*64)),
         );
         for &(rank, select) in select1.iter() {
-            let a = bv.select(&true, rank);
+            let a = bv.select(true, rank);
             if a != select {
                 fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
             }

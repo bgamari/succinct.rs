@@ -52,8 +52,8 @@ impl Access<bool> for BitVector {
 }
 
 impl Rank<bool> for BitVector {
-    fn rank(&self, el: &bool, n: int) -> int {
-        if *el {self.rank1(n)} else {self.rank0(n)}
+    fn rank(&self, el: bool, n: int) -> int {
+        if el {self.rank1(n)} else {self.rank0(n)}
     }
 }
 
@@ -78,8 +78,7 @@ impl BitRank for BitVector {
 
 impl Select<bool> for BitVector {
     #[inline(always)]
-    fn select(&self, bit: &bool, n: int) -> int {
-        let bit: bool = *bit;
+    fn select(&self, bit: bool, n: int) -> int {
         debug_assert!(n >= 0);
         let mut cur: u64 = 0;
         let mut remain: int = n+1; // counting down from n+1
@@ -94,7 +93,7 @@ impl Select<bool> for BitVector {
                 break
             }
         }
-        idx + cur.select(&bit, remain - 1)
+        idx + cur.select(bit, remain - 1)
     }
 }
 
@@ -191,7 +190,7 @@ mod test {
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
             Some(ans) =>
-                TestResult::from_bool(ans == bv.select(&bit, n as int))
+                TestResult::from_bool(ans == bv.select(bit, n as int))
         }
     }
 }

@@ -118,8 +118,8 @@ impl Rank9 {
 }
 
 impl Rank<bool> for Rank9 {
-    fn rank(&self, el: &bool, n: int) -> int {
-        if *el {self.rank1(n)} else {self.rank0(n)}
+    fn rank(&self, el: bool, n: int) -> int {
+        if el {self.rank1(n)} else {self.rank0(n)}
     }
 }
 
@@ -188,8 +188,7 @@ fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
 }
 
 impl Select<bool> for Rank9 {
-    fn select(&self, bit: &bool, n: int) -> int {
-        let bit = *bit;
+    fn select(&self, bit: bool, n: int) -> int {
         // uses `laura-select`
         debug_assert!(n >= 0);
 
@@ -199,7 +198,7 @@ impl Select<bool> for Rank9 {
         let word_idx = counts.select_word(bit, remaining as uint);
         let word: u64 = self.buffer[word_idx + 8*block_idx];
         remaining -= counts.word_rank(bit, word_idx) as int;
-        (block_idx as int)*64*8 + (word_idx as int) * 64 + word.select(&bit, remaining)
+        (block_idx as int)*64*8 + (word_idx as int) * 64 + word.select(bit, remaining)
     }
 }
 
@@ -374,7 +373,7 @@ mod test {
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
             Some(ans) =>
-                TestResult::from_bool(ans == bv.select(&bit, n as int))
+                TestResult::from_bool(ans == bv.select(bit, n as int))
         }
     }
 

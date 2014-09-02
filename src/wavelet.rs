@@ -36,7 +36,7 @@ impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
             match cursor.branch(branch) {
                 &None => break,
                 &Some(_) => {
-                    n = cursor.value.rank(&bit, n as int) as uint;
+                    n = cursor.value.rank(bit, n as int) as uint;
                     cursor.move(branch)
                 },
             }
