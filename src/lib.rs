@@ -4,6 +4,7 @@
 #![feature(phase)]
 
 extern crate core;
+extern crate arena;
 extern crate num;
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[phase(plugin)] extern crate quickcheck_macros;
@@ -15,3 +16,4 @@ pub mod naive;
 pub mod bits;
 pub mod utils;
 pub mod build;
+pub mod wavelet;
