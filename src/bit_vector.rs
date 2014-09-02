@@ -62,7 +62,7 @@ impl BitRank for BitVector {
     }
 
     fn rank1(&self, n: int) -> int {
-        assert!(n < self.bits);
+        assert!(n <= self.bits);
         let mut rank = 0;
         for i in self.buffer.iter().take(n as uint / 64) {
             rank += i.rank1(64);
