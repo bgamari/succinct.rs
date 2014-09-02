@@ -41,3 +41,38 @@ impl<T, B: Builder<u64, T>> Builder<bool, (T, uint)> for BitBuilder<B> {
         (self.builder.finish(), self.size)
     }
 }
+
+/// Build up a `Vec` from elements
+pub struct VecBuilder<T> {
+    buffer: Vec<T>,
+}
+
+impl<T> VecBuilder<T> {
+    pub fn with_capacity(cap: uint) -> VecBuilder<T> {
+        VecBuilder {
+            buffer: Vec::with_capacity(cap),
+        }
+    }
+}
+
+impl<T: Clone> Builder<T, Vec<T>> for VecBuilder<T> {
+    fn push(&mut self, e: &T) {
+        self.buffer.push((*e).clone());
+    }
+    fn finish(self) -> Vec<T> {
+        self.buffer
+    }
+}
+
+/// A pair of `Builder`s is also a `Builder`
+impl<T, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)> for (A, B) {
+    fn push(&mut self, e: &T) {
+        let (ref mut a, ref mut b) = *self;
+        a.push(e);
+        b.push(e);
+    }
+    fn finish(self) -> (RA, RB) {
+        let (a, b) = self;
+        (a.finish(), b.finish())
+    }
+}
