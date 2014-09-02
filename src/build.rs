@@ -1,5 +1,7 @@
 //! Traits for building up objects incrementally
 
+pub use build::buildable::Buildable;
+
 pub trait Builder<E, T> {
     fn push(&mut self, element: E);
     fn finish(self) -> T;
@@ -85,5 +87,51 @@ impl<T: Clone, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)
     fn finish(self) -> (RA, RB) {
         let (a, b) = self;
         (a.finish(), b.finish())
+    }
+}
+
+mod buildable {
+    use std::num::{Zero, zero, One, one};
+    use std::mem::size_of;
+    use super::Builder;
+
+    /// A trait for things that can be built from elements of type `E`
+    pub trait Buildable<E, BuilderT: Builder<E, Self>> {
+        // TODO: Associated type
+        pub fn new_builder() -> BuilderT;
+    }
+
+    /// Build primitive values from their bits (least significant bit first)
+    pub struct PrimBuilder<T> {
+        prim: T,
+        bit: uint,
+    }
+
+    impl<T: Zero> PrimBuilder<T> {
+        pub fn new() -> PrimBuilder<T> {
+            PrimBuilder {
+                prim: zero(),
+                bit: 0,
+            }
+        }
+    }
+
+    impl<T: Shl<uint, T> + BitOr<T,T> + One> Builder<bool, T> for PrimBuilder<T> {
+        fn push(&mut self, e: bool) {
+            debug_assert!(self.bit < size_of::<T>() * 8);
+            if e {
+                self.prim = self.prim | (one::<T>() << self.bit);
+            }
+            self.bit += 1;
+        }
+        fn finish(self) -> T {
+            self.prim
+        }
+    }
+
+    impl Buildable<bool, PrimBuilder<u64>> for u64 {
+        fn new_builder() -> PrimBuilder<u64> {
+            PrimBuilder::new()
+        }
     }
 }
