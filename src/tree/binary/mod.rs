@@ -1,16 +1,44 @@
 pub use tree::binary::cursor::Cursor;
 pub use tree::binary::mut_cursor::MutCursor;
+use std::fmt;
 
 /// A child branch of a `Tree`
 #[deriving(Show)]
 pub enum Branch {Left, Right}
 
 /// A binary tree with nodes labelled with `T`
-#[deriving(Show)]
 pub struct Tree<T> {
     pub value: T,
     pub left: Option<Box<Tree<T>>>,
     pub right: Option<Box<Tree<T>>>,
+}
+
+impl<T: fmt::Show> fmt::Show for Tree<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        use std::fmt::Show;
+        fn indent(level: uint, fmt: &mut fmt::Formatter) -> fmt::Result {
+            for i in range(0, level) {try!(" ".fmt(fmt))}
+            Ok(())
+        }
+
+        fn go<T: Show>(tree: &Tree<T>, fmt: &mut fmt::Formatter, level: uint) -> fmt::Result {
+            try!(indent(2*level, fmt));
+            try!("+ ".fmt(fmt));
+            try!(tree.value.fmt(fmt));
+            try!("\n".fmt(fmt));
+
+            try!(indent(2*level, fmt));
+            try!("| left:\n".fmt(fmt));
+            for subtree in tree.left.iter() {try!(go(&**subtree, fmt, level+1)); }
+
+            try!(indent(2*level, fmt));
+            try!("| right:\n".fmt(fmt));
+            for subtree in tree.right.iter() {try!(go(&**subtree, fmt, level+1)); }
+            try!("\n".fmt(fmt));
+            Ok(())
+        }
+        go(self, fmt, 0)
+    }
 }
 
 impl<T> Tree<T> {
