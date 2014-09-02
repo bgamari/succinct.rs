@@ -47,10 +47,20 @@ pub trait BitIter<Iter: Iterator<bool>> {
     fn bit_iter(self) -> Iter;
 }
 
-impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> BitIter<BitIterator<T>> for T {
-    fn bit_iter(self) -> BitIterator<T> {
-        BitIterator::new(self)
-    }
+impl BitIter<BitIterator<u64>> for u64 {
+    fn bit_iter(self) -> BitIterator<u64> {BitIterator::new(self)}
+}
+
+impl BitIter<BitIterator<u32>> for u32 {
+    fn bit_iter(self) -> BitIterator<u32> {BitIterator::new(self)}
+}
+
+impl BitIter<BitIterator<u16>> for u16 {
+    fn bit_iter(self) -> BitIterator<u16> {BitIterator::new(self)}
+}
+
+impl BitIter<BitIterator<u8>> for u8 {
+    fn bit_iter(self) -> BitIterator<u8> {BitIterator::new(self)}
 }
 
 /// A trait for types for which one can extract arbitrary bits
