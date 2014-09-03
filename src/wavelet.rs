@@ -81,21 +81,27 @@ impl<Iter: Iterator<bool>, BitV: Show+Access<bool>+Rank<bool>, Sym: BitIter<Iter
     fn rank(&self, sym: Sym, mut n: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
-        n += 1;
+        let mut offset: int = 1;
         for bit in bits {
-            println!("n={}, {}", n, cursor.value);
-            n = cursor.value.rank(bit, n - 1);
-            // fix up inconsistency between our
-            // exclusive `rank` and what is needed by the tree
-            if cursor.value.get(n as uint) == bit {
-                n += 1;
-            }
+            // There are three issues here:
+            //   * Gagie uses 1-based indexing while I use 0-based indexing
+            //   * Gagie uses inclusive rank while I use exclusive
+            //   * Need to ensure I count correctly (e.g. a rank of 3
+            //     means the next rank should be at 0-based index 2)
+            // Account for counting
+            n -= 1;
+            // account for exclusive rank
+            n += offset;
+            offset = if cursor.value.get(n as uint) == bit {1} else {0};
+            println!("n={}, {}, rank_{}({}) = {} - 1 + {}",
+                     n, cursor.value, bit, n, cursor.value.rank(bit, n), offset);
+            n = cursor.value.rank(bit, n);
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
                 &Some(_) => cursor.move(bit_to_branch(bit)),
             }
         }
-        n
+        n + offset
     }
 }
 
