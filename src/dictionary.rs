@@ -28,13 +28,16 @@ pub type Count = int;
 
 /// Rank operation
 pub trait Rank<T> {
+    /// Given a sequence `[b_0, b_1, ... b_{n-1}]` `rank_s(i)` is
+    /// the number of occurrences of the symbol `s` in
+    /// `[b_0, b_1, ... b_{i-1}`
     fn rank(&self, el: T, n: Pos) -> Count;
 }
 
 /// Select operation
 pub trait Select<T> {
-    /// Given a sequence, `select(n)` is the 0-based position
-    /// of the `n`th zero.
+    /// Given a sequence, `select_s(n)` is the 0-based position
+    /// of the `n`th occurrence of symbol `s`.
     fn select(&self, el: T, n: Count) -> Pos;
 }
 
