@@ -77,12 +77,19 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
         }
 }
 
-impl<Iter: Iterator<bool>, BitV: Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
+impl<Iter: Iterator<bool>, BitV: Show+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
     fn rank(&self, sym: Sym, mut n: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
+        n += 1;
         for bit in bits {
-            n = cursor.value.rank(bit, n);
+            println!("n={}, {}", n, cursor.value);
+            n = cursor.value.rank(bit, n - 1);
+            // fix up inconsistency between our
+            // exclusive `rank` and what is needed by the tree
+            if cursor.value.get(n as uint) == bit {
+                n += 1;
+            }
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
                 &Some(_) => cursor.move(bit_to_branch(bit)),
