@@ -157,6 +157,18 @@ mod test {
         super::super::dictionary::test::test_rank1(BitVector::from_vec)
     }
 
+    #[quickcheck]
+    fn test_builder(bits: Vec<bool>) -> bool {
+        use super::super::build::Builder;
+        let b = super::Builder::with_capacity(8).from_iter(bits.clone().move_iter());
+        for (i, bit) in bits.iter().enumerate() {
+            if b.get(i) != *bit {
+                return false;
+            }
+        }
+        true
+    }
+
     #[test]
     pub fn test_get() {
         let v = vec!(0b0110, 0b1001, 0b1100);
