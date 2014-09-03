@@ -10,4 +10,3 @@ pub fn div_ceil<T: Integer>(a: T, b: T) -> T {
         a / b
     }
 }
-
