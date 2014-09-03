@@ -6,6 +6,7 @@ use std::num::{One, Zero};
 use std::mem::size_of;
 
 /// An iterator over the bits of a primitive type
+/// The least significant bit is produced first.
 pub struct BitIterator<T> {
     bit: uint,
     x: T,
