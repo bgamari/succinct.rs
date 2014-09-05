@@ -144,6 +144,15 @@ mod cursor {
         node: *const Tree<T>,
     }
 
+    impl<'a, T> Clone for Cursor<'a, T> {
+        fn clone(&self) -> Cursor<'a, T> {
+            Cursor {
+                root: self.root,
+                node: self.node,
+            }
+        }
+    }
+
     impl<'a, T> Cursor<'a, T> {
         /// Create a new `Cursor` pointing to the root of the given `Tree`
         pub fn new(tree: &'a Tree<T>) -> Cursor<'a, T> {
