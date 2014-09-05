@@ -19,6 +19,30 @@ pub struct Wavelet<BitV, Sym> {
     tree: Tree<BitV>,
 }
 
+impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> Wavelet<BitV, Sym> {
+    /// Efficiently test whether the `n`th position is the given
+    /// symbol.
+    ///
+    /// `wavelet.symbol_eq(sym, n)` is Functionally equivalent to
+    /// `wavelet.access(n) == sym` but avoids traversing the entire
+    /// depth of the tree in the unequal case.
+    pub fn symbol_eq(&self, sym: Sym, mut n: int) -> bool {
+        let mut cursor = binary::Cursor::new(&self.tree);
+        for bit in sym.bit_iter() {
+            let branch = bit_to_branch(bit);
+            match cursor.branch(branch) {
+                &None => return false,
+                &Some(_) => if bit != cursor.value.get(n as uint) {
+                    return false;
+                } else {
+                    n = cursor.value.rank(bit, n as int) as int;
+                    cursor.move(branch);
+                }
+            }
+        }
+        true
+    }
+}
 impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
     /// TODO: This needs to turn into an `Access` impl once
     /// `Buildable` has an associated `Builder` type
@@ -82,8 +106,7 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitI
         if n == 0 { return 0; }
         let mut stack: Vec<(bool, binary::Cursor<BitV>)> = Vec::new();
         let mut cursor = binary::Cursor::new(&self.tree);
-        let mut bits = sym.bit_iter();
-        for bit in bits {
+        for bit in sym.bit_iter() {
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => fail!(),
                 &Some(_) => {
@@ -104,9 +127,8 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitI
 impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>>
     Rank<Sym> for Wavelet<BitV, Sym> {
     fn rank(&self, sym: Sym, mut idx: int) -> int {
-        let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
-        for bit in bits {
+        for bit in sym.bit_iter() {
             idx = cursor.value.rank(bit, idx);
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
@@ -192,5 +214,17 @@ mod test {
         let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
         let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
         assert_eq!(wavelet.select(2, 2), 8);
+    }
+
+    #[test]
+    pub fn test_symbol_eq() {
+        use super::super::bit_vector;
+        fn new_bitvector() -> bit_vector::Builder {
+           bit_vector::Builder::with_capacity(128)
+        }
+        let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        assert!(wavelet.symbol_eq(7, 3))
+        assert!(!wavelet.symbol_eq(7, 2))
     }
 }
