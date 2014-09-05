@@ -175,12 +175,24 @@ mod test {
            bit_vector::Builder::with_capacity(128)
         }
 
-        if v.is_empty() || n >= v.len() {
+        if v.iter().filter(|x| *x == &el).count() < n {
             return TestResult::discard()
         }
 
         let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
         let ans = wavelet.select(el, n as int);
         TestResult::from_bool(ans == v.select(el, n as int))
+    }
+
+    #[test]
+    pub fn test_select() {
+        use super::super::bit_vector;
+        fn new_bitvector() -> bit_vector::Builder {
+           bit_vector::Builder::with_capacity(128)
+        }
+
+        let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        assert_eq!(wavelet.select(2, 2), 8);
     }
 }
