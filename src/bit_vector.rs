@@ -2,6 +2,8 @@
 
 use super::dictionary::{Access, Rank, BitRank, Select};
 use std::collections::Collection;
+use std::cmp::min;
+
 pub use bit_vector::build::Builder;
 
 /// A simple bit vector
@@ -62,15 +64,13 @@ impl BitRank for BitVector {
     }
 
     fn rank1(&self, n: int) -> int {
-        assert!(n < self.bits);
+        assert!(n <= self.bits);
         let mut rank = 0;
+        let n = min(self.bits, n);
         for i in self.buffer.iter().take(n as uint / 64) {
             rank += i.rank1(64);
         }
-
-        if n < self.len() as int {
-            rank += self.buffer[n as uint / 64].rank1(n % 64);
-        }
+        rank += self.buffer[n as uint / 64].rank1(n % 64);
         rank
     }
 }
@@ -83,7 +83,6 @@ impl Select<bool> for BitVector {
             return 0;
         }
 
-        println!("{}",self);
         let mut cur: u64 = 0;
         let mut remain: int = n; // counting down from n
         let mut idx: int = 0;
