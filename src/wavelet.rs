@@ -77,31 +77,34 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
         }
 }
 
-impl<Iter: Iterator<bool>, BitV: Show+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
-    fn rank(&self, sym: Sym, mut n: int) -> int {
+impl<Iter: Iterator<bool>, BitV: Show+Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
+    fn rank(&self, sym: Sym, n: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
-        let mut offset: int = 1;
+        if (cursor.value.len() == 1) { return 0; }
+        let mut idx = n;
+        let mut incl_rank = 0;
         for bit in bits {
             // There are three issues here:
             //   * Gagie uses 1-based indexing while I use 0-based indexing
             //   * Gagie uses inclusive rank while I use exclusive
             //   * Need to ensure I count correctly (e.g. a rank of 3
             //     means the next rank should be at 0-based index 2)
-            // Account for counting
-            n -= 1;
-            // account for exclusive rank
-            n += offset;
-            offset = if cursor.value.get(n as uint) == bit {1} else {0};
-            println!("n={}, {}, rank_{}({}) = {} - 1 + {}",
-                     n, cursor.value, bit, n, cursor.value.rank(bit, n), offset);
-            n = cursor.value.rank(bit, n);
+
+            let excl_rank = cursor.value.rank(bit, idx);
+            let offset =
+                if cursor.value.get(idx as uint) == bit {1} else {0};
+            incl_rank = excl_rank + offset;
+            println!("idx={}, bits={}, bit={}, excl_rank={}, incl_rank=excl_rank + {} = {}",
+                     idx, cursor.value, bit, excl_rank, offset, incl_rank);
+            idx = incl_rank - 1;
+
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
                 &Some(_) => cursor.move(bit_to_branch(bit)),
             }
         }
-        n + offset
+        incl_rank
     }
 }
 
