@@ -380,7 +380,6 @@ mod test {
             return TestResult::discard()
         }
 
-        let ones: Vec<u64> = v.iter().map(|n| n.count_ones()).collect();
         let bits = v.len() * 64;
         if v.is_empty() || n >= bits {
             return TestResult::discard()
@@ -395,7 +394,7 @@ mod test {
 
     #[test]
     fn test_binary_search2() {
-        use super::{binary_search, Found, NotFound};
+        use super::{binary_search, Found};
         let xs: Vec<int> = vec!(0, 22, 41, 63);
         assert_eq!(binary_search(|i| xs[*i].cmp(&63), 0, xs.len()), Found(3));
     }

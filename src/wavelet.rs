@@ -5,7 +5,6 @@ use super::dictionary::{Rank, Select, Access};
 use super::build;
 use super::tree::binary::{Tree};
 use super::tree::binary;
-use std::fmt::Show;
 
 fn bit_to_branch(bit: bool) -> binary::Branch {
     match bit {
@@ -80,7 +79,6 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
 impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter<Iter>>
     Select<Sym> for Wavelet<BitV, Sym> {
     fn select(&self, sym: Sym, n: int) -> int {
-        use std::clone;
         if n == 0 { return 0; }
         let mut stack: Vec<(bool, binary::Cursor<BitV>)> = Vec::new();
         let mut cursor = binary::Cursor::new(&self.tree);
@@ -135,7 +133,7 @@ A packed wavelet tree.
 Here the node bitvectors are packed into a single bitvector, removing
 the need for forwarding pointers.
 */
-struct FlatWavelet<BitV, Sym> {
+pub struct FlatWavelet<BitV, Sym> {
     bits: BitV,
 }
 /*
