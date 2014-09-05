@@ -159,7 +159,7 @@ mod test {
            rank9::Builder::with_capacity(128)
         }
 
-        if v.is_empty() || n >= v.len() {
+        if n > v.len() {
             return TestResult::discard()
         }
 
