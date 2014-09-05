@@ -166,6 +166,10 @@ enum BinarySearchResult<T> {
     NotFound(T),
 }
 
+/// Perform a binary search in the range `[lower, upper)`.
+/// If the predicate returns `Equal`, `Found` with the matching index
+/// is returned. Otherwise, `NotFound` is returned with the index of a
+/// valid insertion point.
 fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
         cmp: |&T| -> Ordering, lower: T, upper: T)
         -> BinarySearchResult<T> {
@@ -192,6 +196,7 @@ impl Select<bool> for Rank9 {
         // uses `laura-select`
         debug_assert!(n >= 0);
 
+        if n == 0 { return 0; }
         let block_idx = self.select_block(bit, n as uint);
         let counts = &self.counts[block_idx];
         let mut remaining = n - counts.block_rank(bit, block_idx) as int;
@@ -393,10 +398,15 @@ mod test {
         use super::{binary_search, Found, NotFound};
         if v.len() < 2 {return TestResult::discard()}
         let xs: Vec<int> = FromIterator::from_iter(
-            v.move_iter().scan(0, |acc, x| {*acc += x; Some(*acc+x)}));
+            v.clone().move_iter()
+                .scan(0, |acc, x| {*acc += x; Some(*acc+x)}));
         let res = match binary_search(|i| xs[*i].cmp(&s), 0, xs.len()) {
-            Found(i) => xs[i] == s,
-            NotFound(i) => xs[i-1] < s && xs[i] > s
+            Found(i) =>
+                xs[i] == s,
+            NotFound(i) if i == 0 || i == v.len() =>
+                true,
+            NotFound(i) =>
+                xs[i-1] < s && xs[i] >= s
         };
         TestResult::from_bool(res)
     }
