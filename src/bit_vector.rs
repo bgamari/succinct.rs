@@ -82,9 +82,9 @@ impl Select<bool> for BitVector {
         let mut cur: u64 = 0;
         let mut remain: int = n+1; // counting down from n+1
         let mut idx: int = 0;
-        for i in self.buffer.iter() {
-            cur = *i;
-            let matches = if bit { i.count_ones() } else { i.count_zeros() } as int;
+        for word in self.buffer.iter() {
+            cur = *word;
+            let matches = if bit { word.count_ones() } else { word.count_zeros() } as int;
             if remain - matches > 0 {
                 remain -= matches;
                 idx += 64;
