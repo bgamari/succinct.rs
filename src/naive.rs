@@ -3,10 +3,12 @@
 use super::dictionary::{Access};
 use std::collections::Collection;
 use std::option::{Option, Some, None};
-use std::cmp::Eq;
+use std::cmp::{Eq, min};
 
 /// A very simple rank implementation written to test against
-pub fn rank<T: Eq, BitVec: Access<T>>(v: &BitVec, bit: T, n: int) -> int {
+pub fn rank<T: Eq, BitVec: Access<T> + Collection>(v: &BitVec, bit: T, n: int) -> int {
+    assert!(n <= v.len() as int);
+    let n = min(n, v.len() as int);
     let mut accum = 0;
     for i in range(0, n) {
         if v.get(i as uint) == bit {

@@ -7,6 +7,7 @@
 // See Vigna 2014.
 
 use num::integer::Integer;
+use std::cmp::min;
 use std::num::{One, one, Int};
 use std::iter::range_step_inclusive;
 use super::dictionary::{Rank, BitRank, Select, Access};
@@ -128,7 +129,8 @@ impl Rank<bool> for Rank9 {
 
 impl BitRank for Rank9 {
     fn rank1(&self, n: int) -> int {
-        assert!(n < self.bits);
+        assert!(n <= self.bits);
+        let n = min(n, self.bits);
         let (word, bit_idx) = n.div_mod_floor(&64); // w == word
         let (block, block_word) = word.div_mod_floor(&8);
         let counts = &self.counts[block as uint];
