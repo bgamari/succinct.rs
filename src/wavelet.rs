@@ -1,7 +1,7 @@
 //! Wavelet trees
 
 use super::bits::{BitIter};
-use super::dictionary::{Rank, Access};
+use super::dictionary::{Rank, Select, Access};
 use super::build;
 use super::tree::binary::{Tree};
 use super::tree::binary;
@@ -77,11 +77,37 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
         }
 }
 
-impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
-    fn rank(&self, sym: Sym, n: int) -> int {
+impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter<Iter>>
+    Select<Sym> for Wavelet<BitV, Sym> {
+    fn select(&self, sym: Sym, n: int) -> int {
+        use std::clone;
+        if n == 0 { return 0; }
+        let mut stack: Vec<(bool, binary::Cursor<BitV>)> = Vec::new();
+        let mut cursor = binary::Cursor::new(&self.tree);
+        let mut bits = sym.bit_iter();
+        for bit in bits {
+            match cursor.branch(bit_to_branch(bit)) {
+                &None    => fail!(),
+                &Some(_) => {
+                    stack.push((bit, cursor.clone()));
+                    cursor.move(bit_to_branch(bit))
+                },
+            }
+        }
+
+        let mut n = n;
+        for (bit,cursor) in stack.move_iter().rev() {
+            n = cursor.value.select(bit, n);
+        }
+        n
+    }
+}
+
+impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>>
+    Rank<Sym> for Wavelet<BitV, Sym> {
+    fn rank(&self, sym: Sym, mut idx: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
-        let mut idx = n;
         for bit in bits {
             idx = cursor.value.rank(bit, idx);
             match cursor.branch(bit_to_branch(bit)) {
@@ -123,11 +149,27 @@ impl FlatWavelet<BitV, Sym> {
 #[cfg(test)]
 mod test {
     use quickcheck::TestResult;
-    use super::super::dictionary::Rank;
+    use super::super::dictionary::{Rank, Select};
     use super::super::build::Builder;
 
     #[quickcheck]
     fn rank_is_correct(el: u8, v: Vec<u8>, n: uint) -> TestResult {
+        use super::super::rank9;
+        fn new_bitvector() -> rank9::Builder {
+           rank9::Builder::with_capacity(128)
+        }
+
+        if v.is_empty() || n >= v.len() {
+            return TestResult::discard()
+        }
+
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let ans = wavelet.rank(el, n as int);
+        TestResult::from_bool(ans == v.rank(el, n as int))
+    }
+
+    #[quickcheck]
+    fn select_is_correct(el: u8, v: Vec<u8>, n: uint) -> TestResult {
         use super::super::bit_vector;
         fn new_bitvector() -> bit_vector::Builder {
            bit_vector::Builder::with_capacity(128)
@@ -138,7 +180,7 @@ mod test {
         }
 
         let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
-        let ans = wavelet.rank(el, n as int);
-        TestResult::from_bool(ans == v.rank(el, n as int))
+        let ans = wavelet.select(el, n as int);
+        TestResult::from_bool(ans == v.select(el, n as int))
     }
 }
