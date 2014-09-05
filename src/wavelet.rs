@@ -81,30 +81,15 @@ impl<Iter: Iterator<bool>, BitV: Show+Collection+Access<bool>+Rank<bool>, Sym: B
     fn rank(&self, sym: Sym, n: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
-        if (cursor.value.len() == 1) { return 0; }
         let mut idx = n;
-        let mut incl_rank = 0;
         for bit in bits {
-            // There are three issues here:
-            //   * Gagie uses 1-based indexing while I use 0-based indexing
-            //   * Gagie uses inclusive rank while I use exclusive
-            //   * Need to ensure I count correctly (e.g. a rank of 3
-            //     means the next rank should be at 0-based index 2)
-
-            let excl_rank = cursor.value.rank(bit, idx);
-            let offset =
-                if cursor.value.get(idx as uint) == bit {1} else {0};
-            incl_rank = excl_rank + offset;
-            println!("idx={}, bits={}, bit={}, excl_rank={}, incl_rank=excl_rank + {} = {}",
-                     idx, cursor.value, bit, excl_rank, offset, incl_rank);
-            idx = incl_rank - 1;
-
+            idx = cursor.value.rank(bit, idx);
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
                 &Some(_) => cursor.move(bit_to_branch(bit)),
             }
         }
-        incl_rank
+        idx
     }
 }
 
