@@ -28,9 +28,9 @@ pub type Count = int;
 
 /// Rank operation
 pub trait Rank<T> {
-    /// Given a sequence `[b_0, b_1, ... b_{n-1}]` `rank_s(i)` is
-    /// the number of occurrences of the symbol `s` in
-    /// `[b_0, b_1, ... b_{i-1}`
+    /// Given a sequence `[b_0, b_1, ... b_{n-1}]` `rank_s(i)` (where
+    /// `i <= n`) is the number of occurrences of the symbol `s` in
+    /// `[b_0, b_1, ... b_{i-1}]`
     fn rank(&self, el: T, n: Pos) -> Count;
 }
 
