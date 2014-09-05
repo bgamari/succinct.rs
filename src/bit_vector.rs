@@ -187,7 +187,7 @@ mod test {
     #[quickcheck]
     fn rank_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
         let bits = v.len() * 64;
-        if v.is_empty() || n >= bits {
+        if n > bits {
             return TestResult::discard()
         }
         let bv = BitVector::from_vec(&v, bits as int);
@@ -197,10 +197,12 @@ mod test {
 
     #[quickcheck]
     fn select_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
-        let bits = v.len() * 64;
-        if v.is_empty() || n >= bits {
+        use std::iter::AdditiveIterator;
+        if (v.iter().map(|x| x.count_ones()).sum() as uint) < n {
             return TestResult::discard()
         }
+
+        let bits = v.len() * 64;
         let bv = BitVector::from_vec(&v, bits as int);
         match naive::select(&bv, bit, n as int) {
             None => TestResult::discard(),
