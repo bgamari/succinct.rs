@@ -8,6 +8,7 @@
 
 use num::integer::Integer;
 use std::num::{One, one, Int};
+use std::iter::range_step_inclusive;
 use super::dictionary::{Rank, BitRank, Select, Access};
 use std::collections::Collection;
 
@@ -38,7 +39,8 @@ impl Counts {
         }
     }
 
-    /// The number of matching bits in blocks up to but not including `block_idx`
+    /// The number of matching bits in blocks up to but not including
+    /// `block_idx`
     fn block_rank(&self, bit: bool, block_idx: uint) -> u64 {
         match bit {
             true => self._block_rank,
@@ -50,7 +52,7 @@ impl Counts {
     /// within this block
     fn select_word(&self, bit: bool, n: uint) -> uint {
         for i in range(0,7) {
-            if n < self.word_rank(bit, i + 1) {
+            if n <= self.word_rank(bit, i + 1) {
                 return i;
             }
         }
@@ -84,7 +86,8 @@ impl Collection for Rank9 {
 impl Rank9 {
     /// Search for the block that contains the `n`th matching bit
     fn select_block(&self, bit: bool, n: uint) -> uint {
-        let block_search =
+        debug_assert!(n > 0);
+        let block_search: BinarySearchResult<uint> =
             binary_search(|idx| self.counts[*idx].block_rank(bit, *idx).cmp(&(n as u64)),
                           0, self.counts.len());
         let start_block = match block_search {
@@ -93,11 +96,11 @@ impl Rank9 {
         };
 
         // we found a block that is potentially surrounded by blocks
-        // with the block rank; we need to find the next matching
+        // with the same block rank; we need to find the next matching
         // bit
-        for block_idx in range(start_block, self.counts.len()) {
-            if self.counts[block_idx as uint].block_rank(bit, block_idx) != n as u64 {
-                return block_idx - 1;
+        for block_idx in range_step_inclusive(start_block as int, 0, -1) {
+            if self.counts[block_idx as uint].block_rank(bit, block_idx as uint) != n as u64 {
+                return block_idx as uint;
             }
         }
         self.counts.len() - 1
@@ -370,6 +373,7 @@ mod test {
 
     #[quickcheck]
     fn select_is_correct(bit: bool, v: Vec<u64>, n: uint) -> TestResult {
+        let ones: Vec<u64> = v.iter().map(|n| n.count_ones()).collect();
         let bits = v.len() * 64;
         if v.is_empty() || n >= bits {
             return TestResult::discard()
@@ -380,6 +384,13 @@ mod test {
             Some(ans) =>
                 TestResult::from_bool(ans == bv.select(bit, n as int))
         }
+    }
+
+    #[test]
+    fn test_binary_search2() {
+        use super::{binary_search, Found, NotFound};
+        let xs: Vec<int> = vec!(0, 22, 41, 63);
+        assert_eq!(binary_search(|i| xs[*i].cmp(&63), 0, xs.len()), Found(3));
     }
 
     #[test]

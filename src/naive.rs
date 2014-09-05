@@ -18,12 +18,15 @@ pub fn rank<T: Eq, BitVec: Access<T>>(v: &BitVec, bit: T, n: int) -> int {
 
 pub fn select<T: Eq, BitVec: Access<T> + Collection>(v: &BitVec, bit: T, n: int) -> Option<int> {
     let mut n = n;
+    if n == 0 {
+        return Some(0);
+    }
     for i in range(0, v.len()) {
         if v.get(i) == bit {
-            if n == 0 {
-                return Some(i as int);
-            }
             n -= 1;
+            if n == 0 {
+                return Some(i as int + 1);
+            }
         }
     }
     None

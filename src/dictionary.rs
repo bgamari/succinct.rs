@@ -36,8 +36,9 @@ pub trait Rank<T> {
 
 /// Select operation
 pub trait Select<T> {
-    /// Given a sequence, `select_s(n)` is the 0-based position
-    /// of the `n`th occurrence of symbol `s`.
+    /// Given a sequence, `select_s(n)` is the smallest 0-based
+    /// position `i` for which `rank_s(i) == n`. In most cases,
+    /// this position after the `n`th occurrence of `s`.
     fn select(&self, el: T, n: Count) -> Pos;
 }
 
@@ -54,15 +55,19 @@ pub trait BitRank {
 
 impl Select<bool> for u64 {
     fn select(&self, bit: bool, n0: Count) -> Pos {
+        if n0 == 0 {
+            return 0;
+        }
+
         let mut idx: int = 0;
         let mut x: u64 = *self;
         let mut n: int = n0;
         for i in range(0u, 64) {
             if (x & 1) == (bit as u64) {
-                if n == 0 {
-                    return idx
-                }
                 n -= 1;
+                if n == 0 {
+                    return idx + 1
+                }
             }
             idx += 1;
             x >>= 1;
@@ -139,11 +144,14 @@ impl<T: Eq> Rank<T> for Vec<T> {
 
 impl<T: Eq> Select<T> for Vec<T> {
     fn select(&self, el: T, mut n: int) -> int {
+        if n == 0 {
+            return 0;
+        }
         for (i, x) in self.iter().enumerate() {
             if x == &el {
                 n -= 1;
                 if n == 0 {
-                    return i as int;
+                    return i as int + 1;
                 }
             }
         }
@@ -158,7 +166,7 @@ pub mod test {
     #[test]
     pub fn test_u64_select() {
         assert_eq!(0x5u64.select(true, 0), 0);
-        assert_eq!(0x5u64.select(true, 1), 2);
+        assert_eq!(0x5u64.select(true, 1), 1);
     }
 
     pub fn test_select0<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
@@ -166,17 +174,17 @@ pub mod test {
         let bv = from_vec(&v, 64*3);
         let select0: Vec<(int, int)> = vec!(
             (0,   0+0*64),
-            (1,   3+0*64),
+            (1,   1+0*64),
             (2,   4+0*64),
 
-            (62,  1+1*64),
+            (62,  0+1*64),
             (63,  2+1*64),
-            (64,  4+1*64),
+            (64,  3+1*64),
             (65,  5+1*64),
 
             (124, 0+2*64),
             (125, 1+2*64),
-            (126, 4+2*64),
+            (126, 2+2*64),
             (127, 5+2*64),
         );
         for &(rank, select) in select0.iter() {
@@ -191,12 +199,13 @@ pub mod test {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let select1: Vec<(int,int)> = vec!(
-            (0, (1+0*64)), // rank is non exclusive rank of zero is always 0
+            (0, (0+0*64)),
             (1, (2+0*64)),
-            (2, (0+1*64)),
-            (3, (3+1*64)),
-            (4, (2+2*64)),
+            (2, (3+0*64)),
+            (3, (1+1*64)),
+            (4, (4+1*64)),
             (5, (3+2*64)),
+            (6, (4+2*64)),
         );
         for &(rank, select) in select1.iter() {
             let a = bv.select(true, rank);
