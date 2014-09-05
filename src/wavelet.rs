@@ -53,7 +53,7 @@ pub struct Builder<BitVBuilder, Sym> {
     new_bitvector: fn() -> BitVBuilder,
 }
 
-impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
+impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
      BI: Iterator<bool>, Sym: BitIter<BI>>
     build::Builder<Sym, Wavelet<BitV, Sym>>
     for Builder<BitVBuilder, Sym> {
@@ -77,7 +77,7 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV> + Show,
         }
 }
 
-impl<Iter: Iterator<bool>, BitV: Show+Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
+impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>> Rank<Sym> for Wavelet<BitV, Sym> {
     fn rank(&self, sym: Sym, n: int) -> int {
         let mut bits = sym.bit_iter();
         let mut cursor = binary::Cursor::new(&self.tree);
