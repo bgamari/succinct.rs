@@ -43,6 +43,11 @@ impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> 
         true
     }
 }
+
+impl<BitV: Rank<bool> + Access<bool>, Sym: Ord> Wavelet<BitV, Sym> {
+    pub fn range_next_value(i: uint, j: uint, sym: Sym) {}
+}
+
 impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
     /// TODO: This needs to turn into an `Access` impl once
     /// `Buildable` has an associated `Builder` type
