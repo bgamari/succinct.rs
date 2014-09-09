@@ -88,23 +88,58 @@ impl Rank9 {
     /// Search for the block that contains the `n`th matching bit
     fn select_block(&self, bit: bool, n: uint) -> uint {
         debug_assert!(n > 0);
-        let block_search: BinarySearchResult<uint> =
-            binary_search(|idx| self.counts[*idx].block_rank(bit, *idx).cmp(&(n as u64)),
-                          0, self.counts.len());
-        let start_block = match block_search {
-            Found(block) => block,
-            NotFound(i) => return i - 1,
-        };
+        self.select_block_hlpr(bit, n, 0, self.counts.len());
+        // todo LD: can we have default settings for method arguments?
+    }
 
-        // we found a block that is potentially surrounded by blocks
-        // with the same block rank; we need to find the next matching
-        // bit
-        for block_idx in range_step_inclusive(start_block as int, 0, -1) {
-            if self.counts[block_idx as uint].block_rank(bit, block_idx as uint) != n as u64 {
-                return block_idx as uint;
+
+    fn select_block_hlpr(&self, bit:bool, n:uint, lower:uint, upper:uint) -> uint {
+            let block_search: BinarySearchResult<uint> =
+                binary_search(|idx| self.counts[*idx].block_rank(bit, *idx).cmp(&(n as u64)),
+                              lower, upper);
+            let start_block = match block_search {
+                Found(block) => block,
+                NotFound(i) => return i - 1,
+            };
+
+            // we found a block that is potentially surrounded by blocks
+            // with the same block rank; we need to find the next matching
+            // bit
+            for block_idx in range_step_inclusive(start_block as int, 0, -1) {
+                if self.counts[block_idx as uint].block_rank(bit, block_idx as uint) != n as u64 {
+                    return block_idx as uint;
+                }
             }
-        }
-        self.counts.len() - 1
+            self.counts.len() - 1
+    }
+
+
+    /// implements the recursion of select_all_blocks
+    fn select_all_blocks_rec(&self, bit:bool, ns:Vec<uint>, lower:uint, upper:uint) -> Vec<uint> {
+        let idx = ns.len()/2;
+        let pos = self.select_block_hlpr(bit, ns[idx], lower, upper);
+
+        let leftResult:Vec<uint> = if idx>0 {
+                self.select_all_blocks_rec(bit, vec!(ns.slice(0,idx)), lower, pos);
+            } else {Vec::with_capacity(0);};
+        let rightResult:Vec<uint> = if(idx<ns.len()-1) {
+                self.select_all_blocks_rec(bit, vec!(ns.slice(idx+1,ns.len())), pos+1, upper);
+            } else {Vec::with_capacity(0); };
+
+        // leftResult ++ (pos) ++ rightResult
+        let result = Vec::with_capacity(ns.len());
+        result.push_all(vec!(leftResult));
+        result.push(pos);
+        result.push_all(vec!(rightResult));
+        result
+    }
+
+    /// select_block for all n's at once.
+    /// naive implementation of multiple selecs = O( ns.len() * log(bitv))
+    /// this implementation = O(ns.len * log log(bitv) )
+    /// = [ log(bitv) + 2 log(bitv/2) + 4 log(bitv/4) ...]
+    fn select_all_blocks(&self, bit:bool, ns: Vec<uint>) -> Vec<uint> {
+        self.select_all_blocks_rec(bit, ns, 0, self.counts.len());
     }
 
     pub fn from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
