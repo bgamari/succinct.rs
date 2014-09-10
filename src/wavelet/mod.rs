@@ -26,16 +26,16 @@ impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> 
     /// `wavelet.symbol_eq(sym, n)` is Functionally equivalent to
     /// `wavelet.access(n) == sym` but avoids traversing the entire
     /// depth of the tree in the unequal case.
-    pub fn symbol_eq(&self, sym: Sym, mut n: int) -> bool {
+    pub fn symbol_eq(&self, sym: Sym, mut n: uint) -> bool {
         let mut cursor = binary::Cursor::new(&self.tree);
         for bit in sym.bit_iter() {
             let branch = bit_to_branch(bit);
             match cursor.branch(branch) {
                 &None => return false,
-                &Some(_) => if bit != cursor.value.get(n as uint) {
+                &Some(_) => if bit != cursor.value.get(n) {
                     return false;
                 } else {
-                    n = cursor.value.rank(bit, n as int) as int;
+                    n = cursor.value.rank(bit, n as int) as uint;
                     cursor.move(branch);
                 }
             }
@@ -43,6 +43,11 @@ impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> 
         true
     }
 }
+
+impl<BitV: Rank<bool> + Access<bool>, Sym: Ord> Wavelet<BitV, Sym> {
+    pub fn range_next_value(i: uint, j: uint, sym: Sym) {}
+}
+
 impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
     /// TODO: This needs to turn into an `Access` impl once
     /// `Buildable` has an associated `Builder` type
