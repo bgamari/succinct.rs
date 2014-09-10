@@ -88,7 +88,7 @@ impl Rank9 {
     /// Search for the block that contains the `n`th matching bit
     fn select_block(&self, bit: bool, n: uint) -> uint {
         debug_assert!(n > 0);
-        self.select_block_hlpr(bit, n, 0, self.counts.len());
+        self.select_block_hlpr(bit, n, 0, self.counts.len())
         // todo LD: can we have default settings for method arguments?
     }
 
@@ -119,18 +119,18 @@ impl Rank9 {
         let idx = ns.len()/2;
         let pos = self.select_block_hlpr(bit, ns[idx], lower, upper);
 
-        let leftResult:Vec<uint> = if idx>0 {
-                self.select_all_blocks_rec(bit, vec!(ns.slice(0,idx)), lower, pos);
-            } else {Vec::with_capacity(0);};
-        let rightResult:Vec<uint> = if(idx<ns.len()-1) {
-                self.select_all_blocks_rec(bit, vec!(ns.slice(idx+1,ns.len())), pos+1, upper);
-            } else {Vec::with_capacity(0); };
+        let leftResult: Vec<uint> = if idx > 0 {
+                self.select_all_blocks_rec(bit, Vec::from_slice(ns.slice(0,idx)), lower, pos)
+            } else {vec!()};
+        let rightResult: Vec<uint> = if idx < ns.len()-1 {
+                self.select_all_blocks_rec(bit, Vec::from_slice(ns.slice(idx+1,ns.len())), pos+1, upper)
+            } else {vec!()};
 
         // leftResult ++ (pos) ++ rightResult
-        let result = Vec::with_capacity(ns.len());
-        result.push_all(vec!(leftResult));
+        let mut result = Vec::with_capacity(ns.len());
+        result.push_all(leftResult.as_slice());
         result.push(pos);
-        result.push_all(vec!(rightResult));
+        result.push_all(rightResult.as_slice());
         result
     }
 
@@ -139,7 +139,7 @@ impl Rank9 {
     /// this implementation = O(ns.len * log log(bitv) )
     /// = [ log(bitv) + 2 log(bitv/2) + 4 log(bitv/4) ...]
     fn select_all_blocks(&self, bit:bool, ns: Vec<uint>) -> Vec<uint> {
-        self.select_all_blocks_rec(bit, ns, 0, self.counts.len());
+        self.select_all_blocks_rec(bit, ns, 0, self.counts.len())
     }
 
     pub fn from_vec<'a>(v: &'a Vec<u64>, length_in_bits: int) -> Rank9 {
