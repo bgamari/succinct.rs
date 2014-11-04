@@ -6,7 +6,6 @@
 //
 // See Vigna 2014.
 
-use num::integer::Integer;
 use std::cmp::min;
 use std::num::{One, one, Int};
 use std::iter::range_step_inclusive;
