@@ -113,7 +113,7 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitI
         let mut cursor = binary::Cursor::new(&self.tree);
         for bit in sym.bit_iter() {
             match cursor.branch(bit_to_branch(bit)) {
-                &None    => fail!(),
+                &None    => panic!(),
                 &Some(_) => {
                     stack.push((bit, cursor.clone()));
                     cursor.move(bit_to_branch(bit))

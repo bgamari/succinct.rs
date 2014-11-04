@@ -108,7 +108,7 @@ mod mut_cursor {
                     super::Right => &mut (*self.node).right,
                 };
                 match b {
-                    &None => fail!("Attempted to move {} into empty branch", branch),
+                    &None => panic!("Attempted to move {} into empty branch", branch),
                     &Some(ref mut child) => {
                         self.node = &mut **child as *mut Tree<T>;
                     }
@@ -175,7 +175,7 @@ mod cursor {
                     super::Right => &(*self.node).right,
                 };
                 match b {
-                    &None => fail!("Attempted to move {} into empty branch", branch),
+                    &None => panic!("Attempted to move {} into empty branch", branch),
                     &Some(ref child) => {
                         self.node = &**child as *const Tree<T>;
                     }

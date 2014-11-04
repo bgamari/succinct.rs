@@ -72,7 +72,7 @@ impl Select<bool> for u64 {
             idx += 1;
             x >>= 1;
         }
-        fail!("Not enough {} bits in {} to select({})", bit, *self, n0);
+        panic!("Not enough {} bits in {} to select({})", bit, *self, n0);
     }
 }
 
@@ -155,7 +155,7 @@ impl<T: Eq> Select<T> for Vec<T> {
                 }
             }
         }
-        fail!("No enough matching elements")
+        panic!("No enough matching elements")
     }
 }
 
@@ -190,7 +190,7 @@ pub mod test {
         for &(rank, select) in select0.iter() {
             let a = bv.select(false, rank);
             if a != select {
-                fail!("select0({}) failed: expected {}, saw {}", rank, select, a);
+                panic!("select0({}) failed: expected {}, saw {}", rank, select, a);
             }
         }
     }
@@ -210,7 +210,7 @@ pub mod test {
         for &(rank, select) in select1.iter() {
             let a = bv.select(true, rank);
             if a != select {
-                fail!("select1({}) failed: expected {}, saw {}", rank, select, a);
+                panic!("select1({}) failed: expected {}, saw {}", rank, select, a);
             }
         }
     }
@@ -240,7 +240,7 @@ pub mod test {
         for &(select, rank) in rank0.iter() {
             let a = bv.rank0(select);
             if a != rank {
-                fail!("rank0({}) failed: expected {}, saw {}", select, rank, a);
+                panic!("rank0({}) failed: expected {}, saw {}", select, rank, a);
             }
         }
     }
@@ -271,7 +271,7 @@ pub mod test {
         for &(select, rank) in rank1.iter() {
             let a = bv.rank1(select);
             if a != rank {
-                fail!("rank1({}) failed: expected {}, saw {}", select, rank, a);
+                panic!("rank1({}) failed: expected {}, saw {}", select, rank, a);
             }
         }
     }
