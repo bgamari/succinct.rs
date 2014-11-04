@@ -37,7 +37,7 @@ impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> 
                     return false;
                 } else {
                     n = cursor.value.rank(bit, n as int) as uint;
-                    cursor.move(branch);
+                    cursor.step(branch);
                 }
             }
         }
@@ -66,7 +66,7 @@ impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
                 &None => break,
                 &Some(_) => {
                     n = cursor.value.rank(bit, n as int) as uint;
-                    cursor.move(branch)
+                    cursor.step(branch)
                 },
             }
         }
@@ -97,12 +97,12 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
                     &Some(_) => {},
                     n => *n = Some(box Tree::singleton((*new_bitvector)())),
                 }
-                cursor.move(branch);
+                cursor.step(branch);
             }
         }
 
         fn finish(self) -> Wavelet<BitV, Sym> {
-            Wavelet { tree: self.tree.tree.map_move(|b| b.finish()) }
+            Wavelet { tree: self.tree.tree.map_step(|b| b.finish()) }
         }
 }
 
@@ -117,13 +117,13 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitI
                 &None    => panic!(),
                 &Some(_) => {
                     stack.push((bit, cursor.clone()));
-                    cursor.move(bit_to_branch(bit))
+                    cursor.step(bit_to_branch(bit))
                 },
             }
         }
 
         let mut n = n;
-        for (bit,cursor) in stack.move_iter().rev() {
+        for (bit,cursor) in stack.step_iter().rev() {
             n = cursor.value.select(bit, n);
         }
         n
@@ -138,7 +138,7 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIte
             idx = cursor.value.rank(bit, idx);
             match cursor.branch(bit_to_branch(bit)) {
                 &None    => return 0,
-                &Some(_) => cursor.move(bit_to_branch(bit)),
+                &Some(_) => cursor.step(bit_to_branch(bit)),
             }
         }
         idx
@@ -189,7 +189,7 @@ mod test {
             return TestResult::discard()
         }
 
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
         let ans = wavelet.rank(el, n as int);
         TestResult::from_bool(ans == v.rank(el, n as int))
     }
@@ -205,7 +205,7 @@ mod test {
             return TestResult::discard()
         }
 
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
         let ans = wavelet.select(el, n as int);
         TestResult::from_bool(ans == v.select(el, n as int))
     }
@@ -218,7 +218,7 @@ mod test {
         }
 
         let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
         assert_eq!(wavelet.select(2, 2), 8);
     }
 
@@ -229,7 +229,7 @@ mod test {
            bit_vector::Builder::with_capacity(128)
         }
         let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().move_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
         assert!(wavelet.symbol_eq(7, 3))
         assert!(!wavelet.symbol_eq(7, 2))
     }

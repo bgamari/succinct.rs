@@ -54,10 +54,10 @@ impl<T> Tree<T> {
         }
     }
 
-    pub fn map_move<V>(self, f: |T| -> V) -> Tree<V> {
+    pub fn map_step<V>(self, f: |T| -> V) -> Tree<V> {
         Tree {
-            left: self.left.map(|x| box x.map_move(|y| f(y))),
-            right: self.right.map(|x| box x.map_move(|y| f(y))),
+            left: self.left.map(|x| box x.map_step(|y| f(y))),
+            right: self.right.map(|x| box x.map_step(|y| f(y))),
             value: f(self.value),
         }
     }
@@ -95,20 +95,20 @@ mod mut_cursor {
             }
         }
 
-        /// Move the cursor back to the root
+        /// Step the cursor back to the root
         pub fn back_to_root(&mut self) {
             self.node = self.root as *mut Tree<T>;
         }
 
         /// Descend down one of the branches
-        pub fn move(&mut self, branch: Branch) {
+        pub fn step(&mut self, branch: Branch) {
             unsafe {
                 let b: &mut Option<Box<Tree<T>>> = match branch {
                     super::Left => &mut (*self.node).left,
                     super::Right => &mut (*self.node).right,
                 };
                 match b {
-                    &None => panic!("Attempted to move {} into empty branch", branch),
+                    &None => panic!("Attempted to step {} into empty branch", branch),
                     &Some(ref mut child) => {
                         self.node = &mut **child as *mut Tree<T>;
                     }
@@ -162,20 +162,20 @@ mod cursor {
             }
         }
 
-        /// Move the cursor back to the root
+        /// Step the cursor back to the root
         pub fn back_to_root(&mut self) {
             self.node = self.root as *const Tree<T>;
         }
 
         /// Descend down one of the branches
-        pub fn move(&mut self, branch: Branch) {
+        pub fn step(&mut self, branch: Branch) {
             unsafe {
                 let b: &Option<Box<Tree<T>>> = match branch {
                     super::Left => &(*self.node).left,
                     super::Right => &(*self.node).right,
                 };
                 match b {
-                    &None => panic!("Attempted to move {} into empty branch", branch),
+                    &None => panic!("Attempted to step {} into empty branch", branch),
                     &Some(ref child) => {
                         self.node = &**child as *const Tree<T>;
                     }
