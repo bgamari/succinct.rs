@@ -5,6 +5,7 @@ use super::dictionary::{Rank, Select, Access};
 use super::build;
 use super::tree::binary::{Tree};
 use super::tree::binary;
+use super::collection::Collection;
 
 fn bit_to_branch(bit: bool) -> binary::Branch {
     match bit {

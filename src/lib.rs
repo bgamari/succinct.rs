@@ -9,6 +9,7 @@ extern crate num;
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[phase(plugin)] extern crate quickcheck_macros;
 
+pub mod collection;
 pub mod dictionary;
 pub mod bit_vector;
 pub mod rank9;

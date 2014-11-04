@@ -1,7 +1,7 @@
 //! Exceedingly naive implementations for dictionary operations
 
 use super::dictionary::{Access};
-use std::collections::Collection;
+use super::collection::{Collection};
 use std::option::{Option, Some, None};
 use std::cmp::{Eq, min};
 

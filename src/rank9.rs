@@ -11,7 +11,7 @@ use std::cmp::min;
 use std::num::{One, one, Int};
 use std::iter::range_step_inclusive;
 use super::dictionary::{Rank, BitRank, Select, Access};
-use std::collections::Collection;
+use super::collection::Collection;
 
 pub use rank9::build::Builder;
 
