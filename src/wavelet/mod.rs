@@ -225,7 +225,7 @@ mod test {
         }
 
         let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().into_iter());
         assert_eq!(wavelet.select(2, 2), 8);
     }
 
@@ -236,7 +236,7 @@ mod test {
            bit_vector::Builder::with_capacity(128)
         }
         let v: Vec<u8> = vec!(4, 6, 2, 7, 5, 1, 6, 2);
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().into_iter());
         assert!(wavelet.symbol_eq(7, 3));
         assert!(!wavelet.symbol_eq(7, 2));
     }

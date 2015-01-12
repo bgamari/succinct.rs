@@ -448,7 +448,7 @@ mod test {
         use super::binary_search;
         if v.len() < 2 {return TestResult::discard()}
         let xs: Vec<int> = FromIterator::from_iter(
-            v.clone().move_iter()
+            v.clone().into_iter()
                 .scan(0, |acc, x| {*acc += x; Some(*acc+x)}));
         let res = match binary_search(|i| xs[*i].cmp(&s), 0, xs.len()) {
             Ok(i) =>
