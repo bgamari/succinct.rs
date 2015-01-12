@@ -2,7 +2,7 @@
 
 pub use build::buildable::{Buildable, PrimBuilder};
 
-pub trait Builder<E, T> {
+pub trait Builder<E, T> where Self: Sized {
     fn push(&mut self, element: E);
     fn finish(self) -> T;
 
