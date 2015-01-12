@@ -2,7 +2,7 @@
 
 use super::dictionary::{Access};
 use super::collection::{Collection};
-use std::option::{Option, Some, None};
+use std::option::Option::{self, Some, None};
 use std::cmp::{Eq, min};
 
 /// A very simple rank implementation written to test against

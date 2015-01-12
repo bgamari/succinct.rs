@@ -3,14 +3,15 @@
 use super::bits::{BitIter};
 use super::dictionary::{Rank, Select, Access};
 use super::build;
-use super::tree::binary::{Tree};
 use super::tree::binary;
+use super::tree::binary::{Tree};
+use super::tree::binary::Branch::{self, Left, Right};
 use super::collection::Collection;
 
-fn bit_to_branch(bit: bool) -> binary::Branch {
+fn bit_to_branch(bit: bool) -> Branch {
     match bit {
-        true => binary::Right,
-        false => binary::Left,
+        true => Right,
+        false => Left,
     }
 }
 
@@ -55,7 +56,7 @@ impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
     pub fn access<SymBuilder: build::Builder<bool, Sym>>(&self, mut builder: SymBuilder, mut n: uint) -> Sym {
         let mut cursor = binary::Cursor::new(&self.tree);
         loop {
-            if cursor.branch(binary::Left).is_none() {  // HACK: encode the leaf
+            if cursor.branch(Left).is_none() {  // HACK: encode the leaf
                 break;
             }
             let bit = cursor.value.get(n);

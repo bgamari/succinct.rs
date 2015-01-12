@@ -78,6 +78,7 @@ impl<T> Tree<T> {
 }
 
 mod mut_cursor {
+    use std::ops::{Deref, DerefMut};
     use super::{Tree, Branch};
 
     /// A cursor allowing safe navigation and mutation of `Trees`
@@ -103,9 +104,10 @@ mod mut_cursor {
         /// Descend down one of the branches
         pub fn step(&mut self, branch: Branch) {
             unsafe {
+                use super::Branch::{Left, Right};
                 let b: &mut Option<Box<Tree<T>>> = match branch {
-                    super::Left => &mut (*self.node).left,
-                    super::Right => &mut (*self.node).right,
+                    Left => &mut (*self.node).left,
+                    Right => &mut (*self.node).right,
                 };
                 match b {
                     &None => panic!("Attempted to step {} into empty branch", branch),
@@ -136,6 +138,7 @@ mod mut_cursor {
 }
 
 mod cursor {
+    use std::ops::Deref;
     use super::{Tree, Branch};
 
     /// A cursor allowing safe navigation of `Trees`
@@ -170,9 +173,10 @@ mod cursor {
         /// Descend down one of the branches
         pub fn step(&mut self, branch: Branch) {
             unsafe {
+                use super::Branch::{Left, Right};
                 let b: &Option<Box<Tree<T>>> = match branch {
-                    super::Left => &(*self.node).left,
-                    super::Right => &(*self.node).right,
+                    Left => &(*self.node).left,
+                    Right => &(*self.node).right,
                 };
                 match b {
                     &None => panic!("Attempted to step {} into empty branch", branch),
