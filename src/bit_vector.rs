@@ -11,7 +11,7 @@ pub use bit_vector::build::Builder;
 ///
 /// The first bit in the vector is the least-significant bit of the
 /// first broadword
-#[deriving(Show)]
+#[derive(Show)]
 pub struct BitVector {
     /// length in bits
     bits: int,
@@ -107,7 +107,7 @@ mod build {
     use super::BitVector;
 
     /// Build a `BitVector` from bits
-    #[deriving(Show)]
+    #[derive(Show)]
     pub struct Builder {
         builder: build::BitBuilder<build::VecBuilder<u64>>,
     }

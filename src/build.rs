@@ -15,7 +15,7 @@ pub trait Builder<E, T> where Self: Sized {
 }
 
 /// Build a stream of `u64`s from a stream of bits
-#[deriving(Show)]
+#[derive(Show)]
 pub struct BitBuilder<B> {
     builder: B,
     accum: u64,
@@ -59,7 +59,7 @@ impl<T, B: Builder<u64, T>> Builder<bool, (T, uint)> for BitBuilder<B> {
 }
 
 /// Build up a `Vec` from elements
-#[deriving(Show)]
+#[derive(Show)]
 pub struct VecBuilder<T> {
     buffer: Vec<T>,
 }
