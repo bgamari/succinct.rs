@@ -194,7 +194,7 @@ impl BitRank for Rank9 {
         // within-word contribution
         let masked = self.buffer[word as uint] & ((1 << (bit_idx as uint)) - 1);
 
-        (counts._block_rank + word_rank + masked.count_ones()) as int
+        (counts._block_rank + word_rank + masked.count_ones() as u64) as int
     }
 
     fn rank0(&self, n: int) -> int {
