@@ -3,6 +3,7 @@
 use super::dictionary::{Access, Rank, BitRank, Select};
 use super::collection::Collection;
 use std::cmp::min;
+use std::num::Int;
 
 pub use bit_vector::build::Builder;
 

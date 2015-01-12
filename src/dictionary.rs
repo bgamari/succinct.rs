@@ -4,6 +4,8 @@
 //
 // Bit indices are 0-based.
 
+use std::num::Int;
+
 /// An analog to the usual `Index` trait but allowing return by value.
 pub trait Access<T> {
     /// Retrieve the `n`th item

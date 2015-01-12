@@ -7,7 +7,7 @@
 // See Vigna 2014.
 
 use std::cmp::{min, Ordering};
-use std::num::{Int};
+use std::num::Int;
 use std::iter::range_step_inclusive;
 use std::ops::Shr;
 use super::dictionary::{Rank, BitRank, Select, Access};
@@ -204,7 +204,7 @@ impl BitRank for Rank9 {
 /// If the predicate returns `Equal`, `Ok` with the matching index
 /// is returned. Otherwise, `Err` is returned with the index of a
 /// valid insertion point.
-fn binary_search<T: Num + Shr<uint,T> + Ord + Int + Clone>(
+fn binary_search<T: Shr<T> + Ord + Int + Clone>(
         cmp: Fn(&T) -> Ordering, lower: T, upper: T)
         -> Result<T,T> {
     let mut base : T = lower.clone();
@@ -242,6 +242,7 @@ impl Select<bool> for Rank9 {
 }
 
 mod build {
+    use std::num::Int;
     use super::super::build;
     use super::{Counts, Rank9};
     use utils::div_ceil;
