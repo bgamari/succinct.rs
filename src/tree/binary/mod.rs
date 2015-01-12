@@ -46,7 +46,8 @@ impl<T> Tree<T> {
         Tree {value: value, left: None, right: None}
     }
 
-    pub fn map<V>(&self, f: Fn(&T) -> V) -> Tree<V> {
+    pub fn map<F, V>(&self, f: F) -> Tree<V>
+        where F : Fn(&T) -> V {
         Tree {
             left: self.left.as_ref().map(|x| box x.map(|y| f(y))),
             right: self.right.as_ref().map(|x| box x.map(|y| f(y))),
@@ -54,7 +55,8 @@ impl<T> Tree<T> {
         }
     }
 
-    pub fn map_step<V>(self, f: Fn(T) -> V) -> Tree<V> {
+    pub fn map_step<F, V>(self, f: F) -> Tree<V>
+        where F: Fn(T) -> V {
         Tree {
             left: self.left.map(|x| box x.map_step(|y| f(y))),
             right: self.right.map(|x| box x.map_step(|y| f(y))),

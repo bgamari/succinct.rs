@@ -204,9 +204,9 @@ impl BitRank for Rank9 {
 /// If the predicate returns `Equal`, `Ok` with the matching index
 /// is returned. Otherwise, `Err` is returned with the index of a
 /// valid insertion point.
-fn binary_search<T: Shr<T> + Ord + Int + Clone>(
-        cmp: Fn(&T) -> Ordering, lower: T, upper: T)
-        -> Result<T,T> {
+fn binary_search<T: Shr<T> + Ord + Int + Clone, F>(cmp: F, lower: T, upper: T) -> Result<T,T>
+    where F: Fn(&T) -> Ordering
+{
     let mut base : T = lower.clone();
     let mut lim : T = upper.clone();
 
