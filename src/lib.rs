@@ -1,6 +1,7 @@
 #![crate_name = "succinct"]
 #![crate_type = "lib"]
 #![feature(box_syntax, int_uint)]
+#![allow(unstable)]
 
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[macro_use] extern crate quickcheck_macros;
