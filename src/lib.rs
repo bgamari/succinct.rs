@@ -5,7 +5,7 @@
 extern crate core;
 extern crate alloc;
 #[cfg(test)] extern crate quickcheck;
-#[cfg(test)] #[phase(plugin)] extern crate quickcheck_macros;
+#[cfg(test)] #[macro_use] extern crate quickcheck_macros;
 
 pub mod collection;
 pub mod dictionary;
