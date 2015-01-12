@@ -3,7 +3,7 @@ pub use tree::binary::mut_cursor::MutCursor;
 use std::fmt;
 
 /// A child branch of a `Tree`
-#[deriving(Show)]
+#[derive(Show)]
 pub enum Branch {Left, Right}
 
 /// A binary tree with nodes labelled with `T`
@@ -112,7 +112,7 @@ mod mut_cursor {
                     Right => &mut (*self.node).right,
                 };
                 match b {
-                    &mut None => panic!("Attempted to step {} into empty branch", branch),
+                    &mut None => panic!("Attempted to step {:?} into empty branch", branch),
                     &mut Some(ref mut child) => {
                         self.node = &mut **child as *mut Tree<T>;
                     }
@@ -182,7 +182,7 @@ mod cursor {
                     Right => &(*self.node).right,
                 };
                 match b {
-                    &None => panic!("Attempted to step {} into empty branch", branch),
+                    &None => panic!("Attempted to step {:?} into empty branch", branch),
                     &Some(ref child) => {
                         self.node = &**child as *const Tree<T>;
                     }
