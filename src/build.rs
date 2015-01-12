@@ -125,7 +125,8 @@ mod buildable {
         fn push(&mut self, e: bool) {
             debug_assert!(self.bit < size_of::<T>() * 8);
             if e {
-                self.prim = self.prim | (Int::one::<T>() << self.bit);
+                let one: T = Int::one();
+                self.prim = self.prim | (one << self.bit);
             }
             self.bit += 1;
         }
