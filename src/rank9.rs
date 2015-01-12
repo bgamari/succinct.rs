@@ -120,10 +120,10 @@ impl Rank9 {
         let pos = self.select_block_hlpr(bit, ns[idx], lower, upper);
 
         let leftResult: Vec<uint> = if idx > 0 {
-                self.select_all_blocks_rec(bit, Vec::from_slice(ns.slice(0,idx)), lower, pos)
+                self.select_all_blocks_rec(bit, ns.slice(0,idx).to_vec(), lower, pos)
             } else {vec!()};
         let rightResult: Vec<uint> = if idx < ns.len()-1 {
-                self.select_all_blocks_rec(bit, Vec::from_slice(ns.slice(idx+1,ns.len())), pos+1, upper)
+                self.select_all_blocks_rec(bit, ns.slice(idx+1,ns.len()).to_vec(), pos+1, upper)
             } else {vec!()};
 
         // leftResult ++ (pos) ++ rightResult
