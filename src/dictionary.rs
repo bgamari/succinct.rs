@@ -169,7 +169,7 @@ pub mod test {
         assert_eq!(0x5u64.select(true, 1), 1);
     }
 
-    pub fn test_select0<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_select0<T: Select<bool>>(from_vec: Fn(&Vec<u64>, int) -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let select0: Vec<(int, int)> = vec!(
@@ -195,7 +195,7 @@ pub mod test {
         }
     }
 
-    pub fn test_select1<T: Select<bool>>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_select1<T: Select<bool>>(from_vec: Fn(&Vec<u64>, int) -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let select1: Vec<(int,int)> = vec!(
@@ -215,7 +215,7 @@ pub mod test {
         }
     }
 
-    pub fn test_rank0<T: BitRank>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_rank0<T: BitRank>(from_vec: Fn(&Vec<u64>, int) -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v, 64*3);
         let rank0: Vec<(int, int)> = vec!(
@@ -245,7 +245,7 @@ pub mod test {
         }
     }
 
-    pub fn test_rank1<T: BitRank>(from_vec: |&Vec<u64>, int| -> T) {
+    pub fn test_rank1<T: BitRank>(from_vec: Fn(&Vec<u64>, int) -> T) {
         let v = vec!(0b0110, 0b1001, 0b1100);
         let bv = from_vec(&v.clone(), 64*3);
         let rank1: Vec<(int, int)> = vec!(

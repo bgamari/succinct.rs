@@ -210,7 +210,7 @@ enum BinarySearchResult<T> {
 /// is returned. Otherwise, `NotFound` is returned with the index of a
 /// valid insertion point.
 fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
-        cmp: |&T| -> Ordering, lower: T, upper: T)
+        cmp: Fn(&T) -> Ordering, lower: T, upper: T)
         -> BinarySearchResult<T> {
     let mut base : T = lower.clone();
     let mut lim : T = upper.clone();
