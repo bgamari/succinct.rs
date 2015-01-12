@@ -283,7 +283,7 @@ mod build {
 
     impl build::Builder<u64, Vec<Counts>> for CountsBuilder {
         fn push(&mut self, word: u64) {
-            let ones = word.count_ones();
+            let ones = word.count_ones() as u64;
             self.rank_accum += ones;
             self.block_accum += ones;
             if self.length % 8 == 7 {
