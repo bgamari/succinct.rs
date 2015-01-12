@@ -124,13 +124,14 @@ mod mut_cursor {
         }
     }
 
-    impl<'a, T> Deref<Tree<T>> for MutCursor<'a, T> {
+    impl<'a, T> Deref for MutCursor<'a, T> {
+        type Target = Tree<T>;
         fn deref<'b>(&'b self) -> &'b Tree<T> {
             unsafe{ &*self.node }
         }
     }
 
-    impl<'a, T> DerefMut<Tree<T>> for MutCursor<'a, T> {
+    impl<'a, T> DerefMut for MutCursor<'a, T> {
         fn deref_mut<'b>(&'b mut self) -> &'b mut Tree<T> {
             unsafe{ &mut *self.node }
         }
@@ -188,7 +189,8 @@ mod cursor {
         }
     }
 
-    impl<'a, T> Deref<Tree<T>> for Cursor<'a, T> {
+    impl<'a, T> Deref for Cursor<'a, T> {
+        type Target = Tree<T>;
         fn deref<'b>(&'b self) -> &'b Tree<T> {
             unsafe{ &*self.node }
         }
