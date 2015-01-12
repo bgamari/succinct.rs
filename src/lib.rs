@@ -1,8 +1,6 @@
 #![crate_name = "succinct"]
 #![crate_type = "lib"]
 
-#![feature(phase)]
-
 extern crate core;
 extern crate alloc;
 #[cfg(test)] extern crate quickcheck;
