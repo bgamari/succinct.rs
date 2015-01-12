@@ -93,12 +93,12 @@ impl Rank9 {
 
 
     fn select_block_hlpr(&self, bit:bool, n:uint, lower:uint, upper:uint) -> uint {
-            let block_search: BinarySearchResult<uint> =
+            let block_search: Result<uint,uint> =
                 binary_search(|idx| self.counts[*idx].block_rank(bit, *idx).cmp(&(n as u64)),
                               lower, upper);
             let start_block = match block_search {
-                Found(block) => block,
-                NotFound(i) => return i - 1,
+                Ok(block) => block,
+                Err(i) => return i - 1,
             };
 
             // we found a block that is potentially surrounded by blocks
@@ -199,26 +199,20 @@ impl BitRank for Rank9 {
     }
 }
 
-#[deriving(Show, PartialEq, Eq)]
-enum BinarySearchResult<T> {
-    Found(T),
-    NotFound(T),
-}
-
 /// Perform a binary search in the range `[lower, upper)`.
-/// If the predicate returns `Equal`, `Found` with the matching index
-/// is returned. Otherwise, `NotFound` is returned with the index of a
+/// If the predicate returns `Equal`, `Ok` with the matching index
+/// is returned. Otherwise, `Err` is returned with the index of a
 /// valid insertion point.
 fn binary_search<T: Num + Shr<uint,T> + Ord + Int + Clone>(
         cmp: Fn(&T) -> Ordering, lower: T, upper: T)
-        -> BinarySearchResult<T> {
+        -> Result<T,T> {
     let mut base : T = lower.clone();
     let mut lim : T = upper.clone();
 
     while lim > lower {
         let ix = base + (lim >> 1u);
         match cmp(&ix) {
-            Equal => return Found(ix),
+            Equal => return Ok(ix),
             Less => {
                 base = ix + Int::one();
                 lim = lim - Int::one();
@@ -227,7 +221,7 @@ fn binary_search<T: Num + Shr<uint,T> + Ord + Int + Clone>(
         }
         lim = lim >> 1u;
     }
-    return NotFound(base);
+    return Err(base);
 }
 
 impl Select<bool> for Rank9 {
