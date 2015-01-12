@@ -21,7 +21,8 @@ pub struct Wavelet<BitV, Sym> {
     tree: Tree<BitV>,
 }
 
-impl<BitV: Rank<bool> + Access<bool>, Sym: BitIter> Wavelet<BitV, Sym> {
+impl<BitV: Rank<bool> + Access<bool>, Sym: BitIter> Wavelet<BitV, Sym>
+    where <Sym as BitIter>::Iter: Iterator<Item=bool> { // TODO: This bound shouldn't be necessary
     /// Efficiently test whether the `n`th position is the given
     /// symbol.
     ///
@@ -85,7 +86,9 @@ pub struct Builder<BitVBuilder, Sym> {
 
 impl<BitV, BitVBuilder: build::Builder<bool, BitV>, Sym: BitIter>
     build::Builder<Sym, Wavelet<BitV, Sym>>
-    for Builder<BitVBuilder, Sym> {
+    for Builder<BitVBuilder, Sym>
+    where <Sym as BitIter>::Iter: Iterator<Item=bool> // TODO: This bound shouldn't be necessary
+{
 
         fn push(&mut self, element: Sym) {
             let new_bitvector = &self.new_bitvector;
@@ -107,7 +110,9 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>, Sym: BitIter>
 }
 
 impl<BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter>
-    Select<Sym> for Wavelet<BitV, Sym> {
+    Select<Sym> for Wavelet<BitV, Sym>
+    where <Sym as BitIter>::Iter: Iterator<Item=bool> // TODO: This bound shouldn't be necessary
+{
     fn select(&self, sym: Sym, n: int) -> int {
         if n == 0 { return 0; }
         let mut stack: Vec<(bool, binary::Cursor<BitV>)> = Vec::new();
@@ -131,7 +136,9 @@ impl<BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter>
 }
 
 impl<BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter>
-    Rank<Sym> for Wavelet<BitV, Sym> {
+    Rank<Sym> for Wavelet<BitV, Sym>
+    where <Sym as BitIter>::Iter: Iterator<Item=bool> // TODO: This bound shouldn't be necessary
+{
     fn rank(&self, sym: Sym, mut idx: int) -> int {
         let mut cursor = binary::Cursor::new(&self.tree);
         for bit in sym.bit_iter() {
