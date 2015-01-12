@@ -16,6 +16,7 @@ use super::collection::Collection;
 pub use rank9::build::Builder;
 
 /// Counts for a basic block
+#[derive(Copy)]
 pub struct Counts {
     /// first level count (rank up to p)
     _block_rank: u64,
