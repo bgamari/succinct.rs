@@ -66,15 +66,15 @@ impl<T> Tree<T> {
 
     pub fn branch(&self, branch: Branch) -> &Option<Box<Tree<T>>> {
         match branch {
-            Left => &self.left,
-            Right => &self.right,
+            Branch::Left  => &self.left,
+            Branch::Right => &self.right,
         }
     }
 
     pub fn branch_mut(&mut self, branch: Branch) -> &mut Option<Box<Tree<T>>> {
         match branch {
-            Left => &mut self.left,
-            Right => &mut self.right,
+            Branch::Left  => &mut self.left,
+            Branch::Right => &mut self.right,
         }
     }
 }

@@ -215,12 +215,12 @@ fn binary_search<T: Shr<T> + Ord + Int + Clone, F>(cmp: F, lower: T, upper: T) -
     while lim > lower {
         let ix = base + (lim >> 1u);
         match cmp(&ix) {
-            Equal => return Ok(ix),
-            Less => {
+            Ordering::Equal => return Ok(ix),
+            Ordering::Less => {
                 base = ix + Int::one();
                 lim = lim - Int::one();
             }
-            Greater => ()
+            Ordering::Greater => ()
         }
         lim = lim >> 1u;
     }
