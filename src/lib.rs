@@ -1,5 +1,6 @@
 #![crate_name = "succinct"]
 #![crate_type = "lib"]
+#![feature(int_uint)]
 
 extern crate core;
 extern crate alloc;
