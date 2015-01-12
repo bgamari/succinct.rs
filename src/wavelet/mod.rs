@@ -21,7 +21,7 @@ pub struct Wavelet<BitV, Sym> {
     tree: Tree<BitV>,
 }
 
-impl<Iter: Iterator<bool>, BitV: Rank<bool> + Access<bool>, Sym: BitIter<Iter>> Wavelet<BitV, Sym> {
+impl<BitV: Rank<bool> + Access<bool>, Sym: BitIter> Wavelet<BitV, Sym> {
     /// Efficiently test whether the `n`th position is the given
     /// symbol.
     ///
@@ -83,8 +83,7 @@ pub struct Builder<BitVBuilder, Sym> {
     new_bitvector: fn() -> BitVBuilder,
 }
 
-impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
-     BI: Iterator<bool>, Sym: BitIter<BI>>
+impl<BitV, BitVBuilder: build::Builder<bool, BitV>, Sym: BitIter>
     build::Builder<Sym, Wavelet<BitV, Sym>>
     for Builder<BitVBuilder, Sym> {
 
@@ -107,7 +106,7 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>,
         }
 }
 
-impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter<Iter>>
+impl<BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter>
     Select<Sym> for Wavelet<BitV, Sym> {
     fn select(&self, sym: Sym, n: int) -> int {
         if n == 0 { return 0; }
@@ -131,7 +130,7 @@ impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Select<bool>, Sym: BitI
     }
 }
 
-impl<Iter: Iterator<bool>, BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter<Iter>>
+impl<BitV: Collection+Access<bool>+Rank<bool>, Sym: BitIter>
     Rank<Sym> for Wavelet<BitV, Sym> {
     fn rank(&self, sym: Sym, mut idx: int) -> int {
         let mut cursor = binary::Cursor::new(&self.tree);

@@ -28,7 +28,8 @@ impl<T> BitIterator<T> {
     }
 }
 
-impl<T: Shr<uint, T> + BitAnd<T, T> + Int> Iterator<bool> for BitIterator<T> {
+impl<T: Shr<uint> + BitAnd<T> + Int> Iterator for BitIterator<T> {
+    type Item = bool;
     fn next(&mut self) -> Option<bool> {
         match self.bit {
             0 => None,
@@ -43,24 +44,28 @@ impl<T: Shr<uint, T> + BitAnd<T, T> + Int> Iterator<bool> for BitIterator<T> {
 }
 
 /// A trait for types for which one can get an iterator over bits
-pub trait BitIter<Iter: Iterator<bool>> {
-    // TODO: associated type here
-    fn bit_iter(self) -> Iter;
+pub trait BitIter {
+    type Iter: Iterator<Item=bool>;
+    fn bit_iter(self) -> <Self as BitIter>::Iter;
 }
 
-impl BitIter<BitIterator<u64>> for u64 {
+impl BitIter for u64 {
+    type Iter = BitIterator<u64>;
     fn bit_iter(self) -> BitIterator<u64> {BitIterator::new(self)}
 }
 
-impl BitIter<BitIterator<u32>> for u32 {
+impl BitIter for u32 {
+    type Iter = BitIterator<u32>;
     fn bit_iter(self) -> BitIterator<u32> {BitIterator::new(self)}
 }
 
-impl BitIter<BitIterator<u16>> for u16 {
+impl BitIter for u16 {
+    type Iter = BitIterator<u16>;
     fn bit_iter(self) -> BitIterator<u16> {BitIterator::new(self)}
 }
 
-impl BitIter<BitIterator<u8>> for u8 {
+impl BitIter for u8 {
+    type Iter = BitIterator<u8>;
     fn bit_iter(self) -> BitIterator<u8> {BitIterator::new(self)}
 }
 
