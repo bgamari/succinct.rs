@@ -377,22 +377,22 @@ mod test {
 
     #[test]
     fn test_rank0() {
-        super::super::dictionary::test::test_rank0(Rank9::from_vec);
+        super::super::dictionary::test::test_rank0(&Rank9::from_vec);
     }
 
     #[test]
     fn test_rank1() {
-        super::super::dictionary::test::test_rank1(Rank9::from_vec);
+        super::super::dictionary::test::test_rank1(&Rank9::from_vec);
     }
 
     #[test]
     fn test_select0() {
-        super::super::dictionary::test::test_select0(Rank9::from_vec);
+        super::super::dictionary::test::test_select0(&Rank9::from_vec);
     }
 
     #[test]
     fn test_select1() {
-        super::super::dictionary::test::test_select1(Rank9::from_vec);
+        super::super::dictionary::test::test_select1(&Rank9::from_vec);
     }
 
     #[quickcheck]

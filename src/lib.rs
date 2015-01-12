@@ -2,8 +2,6 @@
 #![crate_type = "lib"]
 #![feature(box_syntax, int_uint)]
 
-extern crate core;
-extern crate alloc;
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] #[macro_use] extern crate quickcheck_macros;
 

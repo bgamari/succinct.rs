@@ -144,22 +144,22 @@ mod test {
 
     #[test]
     pub fn test_select0() {
-        super::super::dictionary::test::test_select0(BitVector::from_vec)
+        super::super::dictionary::test::test_select0(&BitVector::from_vec)
     }
 
     #[test]
     pub fn test_select1() {
-        super::super::dictionary::test::test_select1(BitVector::from_vec)
+        super::super::dictionary::test::test_select1(&BitVector::from_vec)
     }
 
     #[test]
     pub fn test_rank0() {
-        super::super::dictionary::test::test_rank0(BitVector::from_vec)
+        super::super::dictionary::test::test_rank0(&BitVector::from_vec)
     }
 
     #[test]
     pub fn test_rank1() {
-        super::super::dictionary::test::test_rank1(BitVector::from_vec)
+        super::super::dictionary::test::test_rank1(&BitVector::from_vec)
     }
 
     #[quickcheck]
