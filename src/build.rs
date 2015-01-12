@@ -121,7 +121,7 @@ mod buildable {
         }
     }
 
-    impl<T: Shl<uint, T> + BitOr<T,T> + Int> Builder<bool, T> for PrimBuilder<T> {
+    impl<T: Shl<usize> + BitOr<T,Output=T> + Int> Builder<bool, T> for PrimBuilder<T> {
         fn push(&mut self, e: bool) {
             debug_assert!(self.bit < size_of::<T>() * 8);
             if e {
