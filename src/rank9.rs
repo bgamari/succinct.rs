@@ -427,35 +427,35 @@ mod test {
 
     #[test]
     fn test_binary_search2() {
-        use super::{binary_search, Found};
+        use super::binary_search;
         let xs: Vec<int> = vec!(0, 22, 41, 63);
-        assert_eq!(binary_search(|i| xs[*i].cmp(&63), 0, xs.len()), Found(3));
+        assert_eq!(binary_search(|i| xs[*i].cmp(&63), 0, xs.len()), Ok(3));
     }
 
     #[test]
     fn test_binary_search() {
-        use super::{binary_search, Found, NotFound};
+        use super::binary_search;
         let xs: Vec<int> = vec!(0, 3, 5, 8);
-        assert_eq!(binary_search(|i| xs[*i].cmp(&5), 0, xs.len()), Found(2));
-        assert_eq!(binary_search(|i| xs[*i].cmp(&4), 0, xs.len()), NotFound(2));
-        assert_eq!(binary_search(|i| xs[*i].cmp(&0), 0, xs.len()), Found(0));
-        assert_eq!(binary_search(|i| xs[*i].cmp(&9), 0, xs.len()), NotFound(4));
+        assert_eq!(binary_search(|i| xs[*i].cmp(&5), 0, xs.len()), Ok(2));
+        assert_eq!(binary_search(|i| xs[*i].cmp(&4), 0, xs.len()), Err(2));
+        assert_eq!(binary_search(|i| xs[*i].cmp(&0), 0, xs.len()), Ok(0));
+        assert_eq!(binary_search(|i| xs[*i].cmp(&9), 0, xs.len()), Err(4));
     }
 
     #[quickcheck]
     fn binary_search_works(v: Vec<int>, s: int) -> TestResult {
         use std::iter::FromIterator;
-        use super::{binary_search, Found, NotFound};
+        use super::binary_search;
         if v.len() < 2 {return TestResult::discard()}
         let xs: Vec<int> = FromIterator::from_iter(
             v.clone().move_iter()
                 .scan(0, |acc, x| {*acc += x; Some(*acc+x)}));
         let res = match binary_search(|i| xs[*i].cmp(&s), 0, xs.len()) {
-            Found(i) =>
+            Ok(i) =>
                 xs[i] == s,
-            NotFound(i) if i == 0 || i == v.len() =>
+            Err(i) if i == 0 || i == v.len() =>
                 true,
-            NotFound(i) =>
+            Err(i) =>
                 xs[i-1] < s && xs[i] >= s
         };
         TestResult::from_bool(res)
