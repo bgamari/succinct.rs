@@ -3,7 +3,7 @@ pub use tree::binary::mut_cursor::MutCursor;
 use std::fmt;
 
 /// A child branch of a `Tree`
-#[derive(Show)]
+#[derive(Show, Copy)]
 pub enum Branch {Left, Right}
 
 /// A binary tree with nodes labelled with `T`
