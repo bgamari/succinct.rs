@@ -369,6 +369,7 @@ mod build {
 
 #[cfg(test)]
 mod test {
+    use std::num::Int;
     use quickcheck::TestResult;
 
     use super::Rank9;
