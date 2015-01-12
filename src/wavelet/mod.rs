@@ -128,7 +128,7 @@ impl<BitV: Collection+Access<bool>+Select<bool>, Sym: BitIter>
         }
 
         let mut n = n;
-        for (bit,cursor) in stack.step_iter().rev() {
+        for (bit,cursor) in stack.into_iter().rev() {
             n = cursor.value.select(bit, n);
         }
         n
@@ -196,7 +196,7 @@ mod test {
             return TestResult::discard()
         }
 
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().into_iter());
         let ans = wavelet.rank(el, n as int);
         TestResult::from_bool(ans == v.rank(el, n as int))
     }
@@ -212,7 +212,7 @@ mod test {
             return TestResult::discard()
         }
 
-        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().step_iter());
+        let wavelet = super::Builder::new(new_bitvector).from_iter(v.clone().into_iter());
         let ans = wavelet.select(el, n as int);
         TestResult::from_bool(ans == v.select(el, n as int))
     }
