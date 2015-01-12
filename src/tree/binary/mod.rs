@@ -112,8 +112,8 @@ mod mut_cursor {
                     Right => &mut (*self.node).right,
                 };
                 match b {
-                    &None => panic!("Attempted to step {} into empty branch", branch),
-                    &Some(ref mut child) => {
+                    &mut None => panic!("Attempted to step {} into empty branch", branch),
+                    &mut Some(ref mut child) => {
                         self.node = &mut **child as *mut Tree<T>;
                     }
                 }
