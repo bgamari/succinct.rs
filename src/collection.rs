@@ -1,3 +1,3 @@
 pub trait Collection {
-    pub fn len(&self) -> uint;
+    fn len(&self) -> uint;
 }
