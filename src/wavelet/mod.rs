@@ -97,7 +97,7 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>, Sym: BitIter>
                 cursor.value.push(bit);
                 let branch = bit_to_branch(bit);
                 match cursor.branch_mut(branch) {
-                    &Some(_) => {},
+                    &mut Some(_) => {},
                     n => *n = Some(box Tree::singleton((*new_bitvector)())),
                 }
                 cursor.step(branch);
