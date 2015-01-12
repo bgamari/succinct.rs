@@ -2,7 +2,7 @@
 
 use std::ops::{Shr, BitAnd};
 use std::iter::Iterator;
-use std::num::{One, Zero};
+use std::num::{Int};
 use std::mem::size_of;
 
 /// An iterator over the bits of a primitive type
@@ -28,12 +28,12 @@ impl<T> BitIterator<T> {
     }
 }
 
-impl<T: Shr<uint, T> + BitAnd<T, T> + One + Zero> Iterator<bool> for BitIterator<T> {
+impl<T: Shr<uint, T> + BitAnd<T, T> + Int> Iterator<bool> for BitIterator<T> {
     fn next(&mut self) -> Option<bool> {
         match self.bit {
             0 => None,
             _ => {
-                let res = Some(!(self.x & One::one()).is_zero());
+                let res = Some(!(self.x & Int::one()).is_zero());
                 self.bit -= 1;
                 self.x = self.x >> 1;
                 res

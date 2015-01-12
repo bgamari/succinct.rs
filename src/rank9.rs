@@ -7,7 +7,7 @@
 // See Vigna 2014.
 
 use std::cmp::min;
-use std::num::{One, one, Int};
+use std::num::{Int};
 use std::iter::range_step_inclusive;
 use super::dictionary::{Rank, BitRank, Select, Access};
 use super::collection::Collection;
@@ -209,7 +209,7 @@ enum BinarySearchResult<T> {
 /// If the predicate returns `Equal`, `Found` with the matching index
 /// is returned. Otherwise, `NotFound` is returned with the index of a
 /// valid insertion point.
-fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
+fn binary_search<T: Num + Shr<uint,T> + Ord + Int + Clone>(
         cmp: Fn(&T) -> Ordering, lower: T, upper: T)
         -> BinarySearchResult<T> {
     let mut base : T = lower.clone();
@@ -220,8 +220,8 @@ fn binary_search<T: Num + Shr<uint,T> + Ord + One + Clone>(
         match cmp(&ix) {
             Equal => return Found(ix),
             Less => {
-                base = ix + one();
-                lim = lim - one();
+                base = ix + Int::one();
+                lim = lim - Int::one();
             }
             Greater => ()
         }

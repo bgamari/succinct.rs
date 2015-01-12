@@ -95,7 +95,7 @@ impl<T: Clone, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)
 }
 
 mod buildable {
-    use std::num::{Zero, zero, One, one};
+    use std::num::Int;
     use std::mem::size_of;
     use super::Builder;
 
@@ -111,20 +111,20 @@ mod buildable {
         bit: uint,
     }
 
-    impl<T: Zero> PrimBuilder<T> {
+    impl<T: Int> PrimBuilder<T> {
         pub fn new() -> PrimBuilder<T> {
             PrimBuilder {
-                prim: zero(),
+                prim: Int::zero(),
                 bit: 0,
             }
         }
     }
 
-    impl<T: Shl<uint, T> + BitOr<T,T> + One> Builder<bool, T> for PrimBuilder<T> {
+    impl<T: Shl<uint, T> + BitOr<T,T> + Int> Builder<bool, T> for PrimBuilder<T> {
         fn push(&mut self, e: bool) {
             debug_assert!(self.bit < size_of::<T>() * 8);
             if e {
-                self.prim = self.prim | (one::<T>() << self.bit);
+                self.prim = self.prim | (Int::one::<T>() << self.bit);
             }
             self.bit += 1;
         }
