@@ -95,6 +95,7 @@ impl<T: Clone, RA, RB, A: Builder<T, RA>, B: Builder<T, RB>> Builder<T, (RA, RB)
 }
 
 mod buildable {
+    use std::ops::{Shl, BitOr};
     use std::num::Int;
     use std::mem::size_of;
     use super::Builder;

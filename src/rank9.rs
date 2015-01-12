@@ -6,9 +6,10 @@
 //
 // See Vigna 2014.
 
-use std::cmp::min;
+use std::cmp::{min, Ordering};
 use std::num::{Int};
 use std::iter::range_step_inclusive;
+use std::ops::Shr;
 use super::dictionary::{Rank, BitRank, Select, Access};
 use super::collection::Collection;
 
