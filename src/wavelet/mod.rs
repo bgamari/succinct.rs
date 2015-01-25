@@ -104,7 +104,8 @@ impl<BitV, BitVBuilder: build::Builder<bool, BitV>, Sym: BitIter>
         }
 
         fn finish(self) -> Wavelet<BitV, Sym> {
-            Wavelet { tree: self.tree.tree.map_step(|b| b.finish()) }
+            use build::Builder;
+            Wavelet { tree: self.tree.tree.map_step(&mut |&: b| b.finish()) }
         }
 }
 

@@ -55,9 +55,9 @@ impl<T> Tree<T> {
         }
     }
 
-    pub fn map_step<F, V>(self, f: &mut FnMut(T) -> V) -> Tree<V> {
+    pub fn map_step<V>(self, f: &mut FnMut(T) -> V) -> Tree<V> {
         Tree {
-            left: self.left.map(|x| -> Box<Tree<V>> box x.map_step(f)),
+            left: self.left.map(|x| box x.map_step(f)),
             right: self.right.map(|x| box x.map_step(f)),
             value: f(self.value),
         }
