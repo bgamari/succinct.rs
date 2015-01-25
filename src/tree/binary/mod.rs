@@ -13,15 +13,15 @@ pub struct Tree<T> {
     pub right: Option<Box<Tree<T>>>,
 }
 
-impl<T: fmt::Show> fmt::Show for Tree<T> {
+impl<T: fmt::Debug> fmt::Debug for Tree<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        use std::fmt::Show;
+        use std::fmt::Debug;
         fn indent(level: uint, fmt: &mut fmt::Formatter) -> fmt::Result {
             for i in range(0, level) {try!(fmt.write_str(" "))};
             Ok(())
         }
 
-        fn go<T: Show>(tree: &Tree<T>, fmt: &mut fmt::Formatter, level: uint) -> fmt::Result {
+        fn go<T: Debug>(tree: &Tree<T>, fmt: &mut fmt::Formatter, level: uint) -> fmt::Result {
             try!(indent(2*level, fmt));
             try!(write!(fmt, "+ node {:p}    ", tree));
             try!(tree.value.fmt(fmt));
