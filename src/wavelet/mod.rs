@@ -16,7 +16,6 @@ fn bit_to_branch(bit: bool) -> Branch {
 }
 
 /// A wavelet tree over symbols of type `Sym`
-#[derive(Show)]
 pub struct Wavelet<BitV, Sym> {
     tree: Tree<BitV>,
 }
