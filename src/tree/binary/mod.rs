@@ -17,7 +17,7 @@ impl<T: fmt::Show> fmt::Show for Tree<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         use std::fmt::Show;
         fn indent(level: uint, fmt: &mut fmt::Formatter) -> fmt::Result {
-            for i in range(0, level) {try!(" ".fmt(fmt))}
+            for i in range(0, level) {try!(fmt.write_str(" "))};
             Ok(())
         }
 
@@ -25,16 +25,16 @@ impl<T: fmt::Show> fmt::Show for Tree<T> {
             try!(indent(2*level, fmt));
             try!(write!(fmt, "+ node {:p}    ", tree));
             try!(tree.value.fmt(fmt));
-            try!("\n".fmt(fmt));
+            try!(fmt.write_str("\n"));
 
             try!(indent(2*level, fmt));
-            try!("| left:\n".fmt(fmt));
+            try!(fmt.write_str("| left:\n"));
             for subtree in tree.left.iter() {try!(go(&**subtree, fmt, level+1)); }
 
             try!(indent(2*level, fmt));
-            try!("| right:\n".fmt(fmt));
+            try!(fmt.write_str("| right:\n"));
             for subtree in tree.right.iter() {try!(go(&**subtree, fmt, level+1)); }
-            try!("\n".fmt(fmt));
+            try!(fmt.write_str("\n"));
             Ok(())
         }
         go(self, fmt, 0)
@@ -55,11 +55,10 @@ impl<T> Tree<T> {
         }
     }
 
-    pub fn map_step<F, V>(self, f: F) -> Tree<V>
-        where F: Fn(T) -> V {
+    pub fn map_step<F, V>(self, f: &mut FnMut(T) -> V) -> Tree<V> {
         Tree {
-            left: self.left.map(|x| box x.map_step(|y| f(y))),
-            right: self.right.map(|x| box x.map_step(|y| f(y))),
+            left: self.left.map(|x| -> Box<Tree<V>> box x.map_step(f)),
+            right: self.right.map(|x| box x.map_step(f)),
             value: f(self.value),
         }
     }
