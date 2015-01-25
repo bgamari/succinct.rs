@@ -47,7 +47,9 @@ impl<BitV: Rank<bool> + Access<bool>, Sym: BitIter> Wavelet<BitV, Sym>
 }
 
 impl<BitV: Rank<bool> + Access<bool>, Sym: Ord> Wavelet<BitV, Sym> {
-    pub fn range_next_value(i: uint, j: uint, sym: Sym) {}
+    pub fn range_next_value(_i: uint, _j: uint, _sym: Sym) {
+        // TODO: Implement me
+    }
 }
 
 impl<BitV: Rank<bool> + Access<bool>, Sym> Wavelet<BitV, Sym> {
